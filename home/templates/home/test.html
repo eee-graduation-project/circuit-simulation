@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuit Simulation</title>
+</head>
+<body>
+  <h2>간단한 회로 테스트하기</h2>
+  {% load static %}
+  <img src="{% static 'temp.png' %}" alt="example circuit">
+  <button onclick="sendCircuitNodes()", type="button">테스트</button>
+  <script type="text/javascript" src="/static/simulate.js"></script>
+</body>
+</html>
