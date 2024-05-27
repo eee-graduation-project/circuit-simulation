@@ -28,6 +28,10 @@ export const boardDragStart = (event) => {
   isDragging = true;
   offsetX = event.clientX - boardEvent.getBoundingClientRect().left;
   offsetY = event.clientY - boardEvent.getBoundingClientRect().top;
+  
+  const num = boardEvent.getAttribute('data-id');
+  wireS = document.querySelectorAll(`line[data-start="${num}"]`);
+  wireE = document.querySelectorAll(`line[data-end="${num}"]`);
 }
 
 const boardDrag = (event) => {
@@ -43,6 +47,18 @@ const boardDrag = (event) => {
 
   const pointL = getSVGCoordinates(x, y+height/2);
   const pointR = getSVGCoordinates(x+width, y+height/2);
+  
+  wireS.forEach((line) => {
+    const dir = line.getAttribute('data-start-dir');
+    const point = (dir=="true") ? pointL : pointR;
+    updateLine(line, point, null);
+  })
+
+  wireE.forEach((line) => {
+    const dir = line.getAttribute('data-end-dir');
+    const point = (dir=="true") ? pointL : pointR;
+    updateLine(line, null, point);
+  })
 }
 
 const boardDrop = () => {
@@ -58,16 +74,21 @@ export const startWire = (event) => {
   const y = top + height/2;
   const point = getSVGCoordinates(x, y);
 
+  const dataId = event.target.parentNode.getAttribute('data-id');
   if (!startPoint) {
     mouseLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     mouseLine.setAttribute('stroke', 'black');
     mouseLine.setAttribute('stroke-width', '2');
+    mouseLine.setAttribute('data-start', dataId);
+    mouseLine.setAttribute('data-start-dir', direction);
     board.appendChild(mouseLine);
     
     startPoint = point;
     updateLine(mouseLine, startPoint, startPoint);
   }
   else {
+    mouseLine.setAttribute('data-end', dataId);
+    mouseLine.setAttribute('data-end-dir', direction);
     updateLine(mouseLine, startPoint, point);
     startPoint = null;
   }
