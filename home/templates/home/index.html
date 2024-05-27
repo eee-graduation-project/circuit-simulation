@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Circuit Simulator</title>
   {% load static %}
-  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
   <div class="mainnav">
     <div class="mainnav__title">
-      <img src="{% static 'logo.svg' %}" width="20px" class="mainnav__title__logo">
+      <img src="{% static 'images/logo.svg' %}" width="20px" class="mainnav__title__logo">
       <div class="mainnav__title__text">Circuit Simulator</div>
     </div>
     <div class="mainnav__menu">
       <ul class="mainnav__menu__tab_list">
-        <li class="mainnav__menu__tab_item">File<img src="{% static 'chevron-down.svg' %}" width="15px"></li>
-        <li class="mainnav__menu__tab_item">Edit<img src="{% static 'chevron-down.svg' %}" width="15px"></li>
-        <li class="mainnav__menu__tab_item">Run<img src="{% static 'chevron-down.svg' %}" width="15px"></li>
+        <li class="mainnav__menu__tab_item">File<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
+        <li class="mainnav__menu__tab_item">Edit<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
+        <li class="mainnav__menu__tab_item">Run<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
       </ul>
       <div class="mainnav__menu__signin">Sign in</div>
     </div>
@@ -25,34 +25,35 @@
   <div class="subnav">
     <div class="subnav__tab">
       <ul class="subnav__tab_list">
-        <li class="subnav__tab_item"><img src="{% static 'arrow-left.svg' %}" width="20px"></li>
-        <li class="subnav__tab_item"><img src="{% static 'arrow-right.svg' %}" width="20px"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/arrow-left.svg' %}" width="20px"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/arrow-right.svg' %}" width="20px"></li>
       </ul>
       <ul class="subnav__tab_list">
-        <li class="subnav__tab_item"><img src="{% static 'rotate-cw.svg' %}" width="20px"></li>
-        <li class="subnav__tab_item"><img src="{% static 'flip-reverse.svg' %}" width="20px"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/rotate-cw.svg' %}" width="20px"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/flip-reverse.svg' %}" width="20px"></li>
       </ul>
     </div>
   </div>
   <div class="content">
-    <div class="board"></div>
+    <svg class="board"></svg>
     <div class="library">
       <div class="library__search">
         <div class="library__search__area">
           <div class="search__text">Search</div>
-          <img src="{% static 'search.svg'%}" width="20px"></li>
+          <img src="{% static 'images/search.svg'%}" width="20px"></li>
         </div>
       </div>
       <div class="library__element">
         <ul class="library__element_list">
-          <li class="library__element_item"><img draggable="true" src="{% static 'capacitor.svg' %}"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'resistor.svg' %}"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'ground.svg' %}"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'inductor.svg' %}"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/capacitor.svg' %}"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/resistor.svg' %}"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/ground.svg' %}"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/inductor.svg' %}"></li>
         </ul>
       </div>
     </div>
   </div>
-  <script type="text/javascript" src="/static/draganddrop.js"></script>
+  <script type="module" src="/static/js/drag-library.js"></script>
+  <script type="module" src="/static/js/drag-board.js"></script>
 </body>
 </html>

@@ -127,6 +127,19 @@ body {
   width: 40px;
 }
 .board__element_item {
+  position: absolute;
+  display: flex;
+}
+
+.board__element_wire {
+  height: 40px;
+}
+/* .board__element_wire:hover line {
+  stroke: blue;
+  height: 60px; 
+} */
+/* .board__element_item img {
   width: 40px;
   position: absolute;
 }
+*/
