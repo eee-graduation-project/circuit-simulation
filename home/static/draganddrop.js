@@ -65,7 +65,9 @@ const drop = (event) => {
   event.target.appendChild(element);
   
   img.addEventListener("mousedown", boardDragStart);
-
+  wireL.addEventListener('mousedown', startWire);
+  wireR.addEventListener('mousedown', startWire);
+  
   elementEvent = null;
 }
 
