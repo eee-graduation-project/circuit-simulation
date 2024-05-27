@@ -47,19 +47,24 @@ const drop = (event) => {
 
   const wireL = document.createElementNS('http://www.w3.org/2000/svg', 'image');
   wireL.setAttribute('href', '/static/images/wire.svg');
+  wireL.setAttribute('draggable', false);
   wireL.setAttribute('class', "board__element_wire");
 
   const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
   const src = elementEvent.target.src;
   img.setAttribute('href', src);
   img.style.height = "40px";
+  img.setAttribute('draggable', false);
   img.setAttribute('x', 15);
 
   const wireR = wireL.cloneNode(true);
   wireR.setAttribute('x', 55);
   
+  element.draggable = 'true';
   element.append(wireL, img, wireR);
   event.target.appendChild(element);
+  
+  img.addEventListener("mousedown", boardDragStart);
 
   elementEvent = null;
 }
