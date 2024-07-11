@@ -33,6 +33,7 @@
         <li class="subnav__tab_item"><img src="{% static 'images/flip-reverse.svg' %}" width="20px"></li>
       </ul>
     </div>
+    <button type="button">Simulate</button>
   </div>
   <div class="content">
     <svg class="board"></svg>
@@ -45,15 +46,21 @@
       </div>
       <div class="library__element">
         <ul class="library__element_list">
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/capacitor.svg' %}"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/resistor.svg' %}"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/ground.svg' %}"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/inductor.svg' %}"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/capacitor.svg' %}" alt="capacitor"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/resistor.svg' %}" alt="resistor"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/ground.svg' %}" alt="ground"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/inductor.svg' %}" alt="inductor"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source.svg' %}" alt="voltage-source"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source.svg' %}" alt="current-source"></li>
         </ul>
       </div>
     </div>
   </div>
+  <script>
+    window.boardId = "{{board_id}}";
+  </script>
   <script type="module" src="/static/js/drag-library.js"></script>
   <script type="module" src="/static/js/drag-board.js"></script>
+  <script type="module" src="/static/js/api.js"></script>
 </body>
 </html>
