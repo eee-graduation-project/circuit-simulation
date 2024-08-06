@@ -3,6 +3,8 @@ import {addNode, addConnection} from "./data.js";
 
 let mouseLine = null;
 let startPoint = null;
+let startWireInfo = null;
+let endWireNum = null;
 let isDragging;
 let offsetX, offsetY;
 
@@ -10,7 +12,7 @@ let boardEvent = null;
 let wireS = null;
 let wireE = null;
 
-let nodeNum = 0;
+let wireNum = 0;
 
 const board = document.querySelector(".board");
 
@@ -44,8 +46,7 @@ const boardDrag = (event) => {
   const x = event.clientX - offsetX;
   const y = event.clientY - offsetY;
   const position = getSVGCoordinates(x, y);
-  boardEvent.setAttribute('x', position.x);
-  boardEvent.setAttribute('y', position.y);
+  boardEvent.setAttribute('transform', `translate(${position.x}, ${position.y})`);
   const {height, width} = boardEvent.getBoundingClientRect();
   const elementType = boardEvent.getAttribute('data-type');
   
@@ -74,30 +75,41 @@ export const startWire = (event) => {
   const [direction, point] = getLinePosition(event.target.parentNode);
   
   const dataId = event.target.parentNode.getAttribute('data-id');
+  const dataType = event.target.parentNode.getAttribute('data-type');
   if (!startPoint) {
+    // if (event.target.hasAttribute('node'))
+    const startWireNum = event.target.getAttribute('wireNum');
     mouseLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     mouseLine.setAttribute('stroke', 'black');
     mouseLine.setAttribute('stroke-width', '2');
     mouseLine.setAttribute('data-start', dataId);
     mouseLine.setAttribute('data-start-dir', direction);
-
+    
+    startWireInfo = {startWireNum, dataId, direction};
     board.appendChild(mouseLine);
     
     startPoint = point;
     updateLine(mouseLine, startPoint, startPoint);
-    
-    addNode(nodeNum);
-    addConnection(nodeNum, dataId, direction);
+    event.target.setAttribute('wire', wireNum);
   }
   else {
     mouseLine.setAttribute('data-end', dataId);
     mouseLine.setAttribute('data-end-dir', direction);
-    mouseLine.setAttribute('nodeNum', nodeNum);
+    mouseLine.setAttribute('wireNum', wireNum);
     updateLine(mouseLine, startPoint, point);
     startPoint = null;
+    
+    endWireNum = event.target.getAttribute('wireNum');
+    
+    addNode(wireNum, startWireInfo.startWireNum, endWireNum);
+    addConnection(wireNum, dataId, direction);
+    addConnection(wireNum, startWireInfo.dataId, startWireInfo.direction);
 
-    addConnection(nodeNum, dataId, direction)
-    nodeNum += 1;
+    endWireNum = null;
+    startWireInfo = null;
+
+    event.target.setAttribute('wire', wireNum);
+    wireNum += 1;
   }
 };
 
