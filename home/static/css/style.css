@@ -64,6 +64,7 @@ body {
   height: 34px;
   justify-content: space-between;
   padding-left: 20px;
+  padding-right: 10px;
   align-items: center;
   border-top: 3px solid #F2F2F2;
   border-bottom: 3px solid #F2F2F2;
@@ -143,3 +144,12 @@ body {
   position: absolute;
 }
 */
+
+/* cursor */
+.probe_voltage {
+  cursor: url('/static/images/probe.svg'), auto;
+}
+
+.probe_current {
+  cursor: url('/static/images/probe.svg'), auto;
+}

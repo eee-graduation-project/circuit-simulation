@@ -40,12 +40,14 @@ const drop = (event) => {
   offsetY = elementEvent.clientY - rect.top;
 
   const position = getSVGCoordinates(event.pageX - offsetX, event.pageY - offsetY);
-
+  // const position = {'x': event.clientX - offsetX, 'y': event.clientY - offsetY};
   const elementType = elementEvent.target.alt;
   const elementName = `${elementType[0].toUpperCase()}${elementCnt[elementType]}`;
-  const element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  element.setAttribute('x', position.x-15);
-  element.setAttribute('y', position.y);
+  const element = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  element.setAttribute('draggable', `true`);
+  element.setAttribute('transform', `translate(${position.x-15}, ${position.y})`);
+  // element.setAttribute('x', position.x-15);
+  // element.setAttribute('y', position.y);
   element.setAttribute('class', "board__element_item");
   element.setAttribute('data-id', elementName);
   element.setAttribute('data-type', elementType);
@@ -53,7 +55,7 @@ const drop = (event) => {
   
   elementCnt[elementType] += 1;
 
-  const wires = appendWire(elementType);
+  const wires = appendWire(elementType, elementName);
   const img = appendImg(elementEvent.target.src);
   const [value, name] = appendText(elementType, elementName);
   
@@ -69,26 +71,41 @@ const drop = (event) => {
   elementEvent = null;
 }
 
-const appendWire = (elementType) => {
+const appendWire = (elementType, elementName) => {
   if (elementType == 'ground') {
-    const wire = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    wire.setAttribute('href', '/static/images/wire.svg');
-    wire.style.transform = 'rotate(90deg)';
+    const wire = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    wire.setAttribute('stroke', 'red');
+    wire.setAttribute('stroke-width', '4');
     wire.setAttribute('draggable', false);
     wire.setAttribute('class', "board__element_wire");
-    wire.setAttribute('y', -55);
+    wire.setAttribute('x1', 35);
+    wire.setAttribute('x2', 35);
+    wire.setAttribute('y1', 0);
+    wire.setAttribute('y2', 15);
+    wire.setAttribute('wireNum', `${elementName}T`);
+    // wire.setAttribute('y', -55);
     // wire.setAttribute('x', -50);
     return [wire];
   }
 
-  const wireL = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-  wireL.setAttribute('href', '/static/images/wire.svg');
+  const wireL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  wireL.setAttribute('stroke', 'red');
+  wireL.setAttribute('stroke-width', '4');
+  wireL.setAttribute('wireNum', `${elementName}L`);
+  wireL.setAttribute('y1', 20);
+  wireL.setAttribute('y2', 20);
+  // wireL.setAttribute('href', '/static/images/wire.svg');
   wireL.setAttribute('draggable', false);
   wireL.setAttribute('class', "board__element_wire");
 
   const wireR = wireL.cloneNode(true);
   wireR.setAttribute('x', 55);
+  wireR.setAttribute('wireNum', `${elementName}R`);
   
+  wireL.setAttribute('x1', 0);
+  wireL.setAttribute('x2', 15);
+  wireR.setAttribute('x1', 55);
+  wireR.setAttribute('x2', 70);
   return [wireL, wireR];
 }
 

@@ -33,7 +33,15 @@
         <li class="subnav__tab_item"><img src="{% static 'images/flip-reverse.svg' %}" width="20px"></li>
       </ul>
     </div>
-    <button type="button">Simulate</button>
+    <div class="subnav__tab">
+      <ul class="subnav__tab_list">
+        <li class="subnav__tab_item"><img src="{% static 'images/cursor.svg' %}" width="20px" alt="cursor"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/wiring.svg' %}" width="20px" alt="wiring"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/voltage-circle.svg' %}" width="20px" alt="voltage-circle"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/current-circle.svg' %}" width="20px" alt="current-circle"></li>
+      </ul>
+      <button type="button">Simulate</button>
+    </div>
   </div>
   <div class="content">
     <svg class="board"></svg>

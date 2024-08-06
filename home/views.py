@@ -68,21 +68,26 @@ class BoardViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 def simulate_circuit(request):
     board_id = uuid.UUID(request.GET.get('boardId'))
+    ground_num = int(request.GET.get('groundNodeNum'))
     if not board_id:
         return Response({'error': 'boardId is required'}, status=status.HTTP_400_BAD_REQUEST)
     
     netlist = []
     components = Component.objects.filter(board=board_id)
     for component in components:
+      if component.type == 'ground':
+        continue
       net = [component.name]
       connections = Connection.objects.filter(component=component).order_by('-position')
       for connection in connections:
-        net.append(int(connection.node.name))
+        node_num = int(connection.node.name)
+        if node_num==ground_num:
+          node_num = 0
+        net.append(node_num)
       net.append(float(component.value[:-1]))
       netlist.append(net)
-    calculate_simulation(netlist)
-    
-    response_data = {'boardId': board_id, 'netlist': netlist}
+    response_data = calculate_simulation(netlist)
+    print(response_data)
     return Response(response_data, status=status.HTTP_200_OK)
 # def test_example(request):
 #   if request.method != 'POST':

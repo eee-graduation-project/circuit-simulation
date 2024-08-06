@@ -14,7 +14,7 @@ const postSimulate = async () => {
   try {
     await Promise.all([postComponent(data.elements), postNode(data.nodes)]);
     await postConnection(data.connections);
-    await getSimulate(window.boardId);
+    await getSimulate(window.boardId, data.groundNodeNum);
   } catch (error) {
     console.error('Error in postSimulate:', error);
   }
@@ -34,7 +34,9 @@ const postNode = async (nodes) => {
   })
 }
 
-const postConnection = async (infos) => {
+const postConnection = async (duplicatedInfos) => {
+  const infoSet = new Set(duplicatedInfos.map(duplicatedInfo => JSON.stringify(duplicatedInfo)));
+  const infos = Array.from(infoSet).map(str => JSON.parse(str));
   const connections = infos.map((info) => {
     return {
       node: nodeId[info.node],
@@ -45,8 +47,8 @@ const postConnection = async (infos) => {
   await requestAPI('POST', '/api/connection/', connections);
 }
 
-const getSimulate = async (boardId) => {
-  const url = `/api/simulation?` + new URLSearchParams({boardId}).toString();
+const getSimulate = async (boardId, groundNodeNum) => {
+  const url = `/api/simulation?` + new URLSearchParams({boardId, groundNodeNum}).toString();
   await requestAPI('GET', url);
 }
 
@@ -58,8 +60,8 @@ const requestAPI = async (method, url, data) => {
       'X-CSRFToken': getCookie('csrftoken')
     }
   }
-  if (body) request.body = JSON.stringify(data);
+  if (data) request['body'] = JSON.stringify(data);
 
-  const response = fetch(url, request);
+  const response = await fetch(url, request);
   return response.json();
 }
