@@ -144,3 +144,20 @@ const updateLine = (line, startPoint, endPoint) => {
     line.setAttribute('y2', endPoint.y);
   }
 }
+
+const voltageButton = document.querySelector('img[alt="voltage-circle"]');
+const cursorButton = document.querySelector('img[alt="cursor"]');
+
+voltageButton.addEventListener("click", (event) => {
+  addVoltageProbe(event);
+})
+cursorButton.addEventListener("click", (event) => {
+  changeCursor();
+})
+
+const addVoltageProbe = (event) => {
+  board.classList.add('probe_voltage');
+}
+const changeCursor = () => {
+  board.classList.remove('probe_voltage');
+}
