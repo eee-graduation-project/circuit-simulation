@@ -20,27 +20,55 @@ ccvs = []
 cccs = []
 G = []
 solve = []
+node_num = 0
+node_map = []
+reverse_node_map = []
+
 
 # data
 data = [
-    ["F1", 2, 3, 1, 2, 2/3],
-    ["R1", 1, 2, 3],
-    ["R2", 2, 3, 0.5],
-    ["R3", 3, 0, 6],
+    ["F1", 4, 5, 1, 2, 2/3],
+    ["R1", 1, 4, 3],
+    ["R2", 4, 5, 0.5],
+    ["R3", 5, 0, 6],
     ["I1", 1, 0, 1.5]
 ]
-
-pin_data = [
-    ["I1", "I"]
-]
-
-node_num = max(max(row[1], row[2]) for row in data)
 
 # data reordering
 def reorder(self):
 
-    # elements separation
+    global reverse_node_map
+    global node_num
+
+    # Deduplication
+    seen = set()
+    unique_data = []
+
     for line in self:
+        name = line[0]
+        if name not in seen:
+            unique_data.append(line)
+            seen.add(name)
+    
+    # node remapping
+    nodes = set()
+    for line in unique_data:
+        nodes.add(line[1])
+        nodes.add(line[2])
+    sorted_nodes = sorted(nodes)
+
+    node_map = {node: i for i, node in enumerate(sorted_nodes)}
+    reverse_node_map = {i: node for i, node in enumerate(sorted_nodes)}
+    
+    for line in unique_data:
+        line[1] = node_map[line[1]]
+        line[2] = node_map[line[2]]
+    
+    # max num of node
+    node_num = len(node_map) - 1
+
+    # elements separation
+    for line in unique_data:
         first_element = line[0]
         if first_element.startswith('R'):
             resistors.append(line)
@@ -508,7 +536,7 @@ def resultf():
   '''
   for ix, value in enumerate(x):
     if ix <= node_num:
-        result2.append([ix, value])
+        result2.append([reverse_node_map[ix], value])
 
   return result, result2
 
