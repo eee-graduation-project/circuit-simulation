@@ -27,11 +27,9 @@ reverse_node_map = []
 
 # data
 data = [
-    ["F1", 4, 5, 1, 2, 2/3],
-    ["R1", 1, 4, 3],
-    ["R2", 4, 5, 0.5],
-    ["R3", 5, 0, 6],
-    ["I1", 1, 0, 1.5]
+    ["I1", 1, 0, 8],
+    ["V1", 3, 0, 3],
+    ["R1", 1, 3, 2],
 ]
 
 # data reordering
@@ -489,11 +487,11 @@ print(solve)
 
 #result reodering
 def resultf():
-
   result = []
   result2 = []
 
-  x = np.insert(solve, 0, 0.) # insert 0 at the first element
+  x = np.round(np.insert(solve, 0, 0.),3) # insert 0 at the first element
+
   ## reoder for source ##
   '''
   ['naem', voltage, current]
