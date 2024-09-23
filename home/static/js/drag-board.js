@@ -1,7 +1,7 @@
 import {getSVGCoordinates} from "./utils.js";
 import {addNode, addConnection} from "./data.js";
 
-let mouseLine = null;
+let mouseLines = null;
 let startPoint = null;
 let startWireInfo = null;
 let endWireNum = null;
@@ -33,10 +33,13 @@ export const boardDragStart = (event) => {
   isDragging = true;
   offsetX = event.clientX - boardEvent.getBoundingClientRect().left;
   offsetY = event.clientY - boardEvent.getBoundingClientRect().top;
-  
   const num = boardEvent.getAttribute('data-id');
-  wireS = document.querySelectorAll(`line[data-start="${num}"]`);
-  wireE = document.querySelectorAll(`line[data-end="${num}"]`);
+  const wireSgroup = document.querySelector(`g[data-start="${num}"]`);
+  const wireEgroup = document.querySelector(`g[data-end="${num}"]`);
+  wireS = wireSgroup ? Array.from(wireSgroup.children) : [];
+  wireE = wireEgroup ? Array.from(wireEgroup.children) : [];
+  console.log(wireS);
+  console.log(wireE);
 }
 
 const boardDrag = (event) => {
@@ -52,7 +55,7 @@ const boardDrag = (event) => {
   
   const pointL = getSVGCoordinates(x, y+height/2);
   const pointR = getSVGCoordinates(x+width, y+height/2);
-  
+  // element를 옮길 때 양옆에 연결된 wire를 찾아서 같이 이동시킴
   wireS.forEach((line) => {
     const dir = line.getAttribute('data-start-dir');
     const point = (elementType == 'ground') ? getSVGCoordinates(x+width/2, y) : ((dir=="true") ? pointL : pointR);
@@ -70,7 +73,7 @@ const boardDrop = () => {
   isDragging = false;
   boardEvent = null;
 }
-
+// wire를 처음 연결
 export const startWire = (event) => {
   const [direction, point] = getLinePosition(event.target.parentNode);
   
@@ -79,24 +82,30 @@ export const startWire = (event) => {
   if (!startPoint) {
     // if (event.target.hasAttribute('node'))
     const startWireNum = event.target.getAttribute('wireNum');
-    mouseLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    mouseLine.setAttribute('stroke', 'black');
-    mouseLine.setAttribute('stroke-width', '2');
-    mouseLine.setAttribute('data-start', dataId);
-    mouseLine.setAttribute('data-start-dir', direction);
+    mouseLines = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    mouseLines.setAttribute('data-start', dataId);
+    mouseLines.setAttribute('data-start-dir', direction);
     
+    const mouseHorizonLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    mouseHorizonLine.setAttribute('stroke', 'black');
+    mouseHorizonLine.setAttribute('stroke-width', '2.5');
+    mouseHorizonLine.setAttribute('class', 'board__wire');
+
+    const mouseVerticalLine = mouseHorizonLine.cloneNode(true);
+
     startWireInfo = {startWireNum, dataId, direction};
-    board.appendChild(mouseLine);
+    mouseLines.append(mouseHorizonLine, mouseVerticalLine);
+    board.appendChild(mouseLines);
     
     startPoint = point;
-    updateLine(mouseLine, startPoint, startPoint);
+    updateLine(mouseLines, startPoint, startPoint);
     event.target.setAttribute('wire', wireNum);
   }
   else {
-    mouseLine.setAttribute('data-end', dataId);
-    mouseLine.setAttribute('data-end-dir', direction);
-    mouseLine.setAttribute('wireNum', wireNum);
-    updateLine(mouseLine, startPoint, point);
+    mouseLines.setAttribute('data-end', dataId);
+    mouseLines.setAttribute('data-end-dir', direction);
+    mouseLines.setAttribute('wireNum', wireNum);
+    updateLine(mouseLines, startPoint, point);
     startPoint = null;
     
     endWireNum = event.target.getAttribute('wireNum');
@@ -110,6 +119,10 @@ export const startWire = (event) => {
 
     event.target.setAttribute('wire', wireNum);
     wireNum += 1;
+
+    mouseLines.addEventListener("click", (event) => {
+      setVoltageProbe(event)
+    });
   }
 };
 
@@ -118,46 +131,77 @@ const getLinePosition = (node) => {
   const elementType = node.getAttribute('data-type');
   // 1이면 왼쪽, 0이면 오른쪽
   if (elementType == 'ground') {
-    const point = getSVGCoordinates(left+width/2, top);
+    const point = getSVGCoordinates(left+width/2, top+1.5);
     return [2, point];
   }
   const direction = (event.clientX < left + width/2);
   const x = left + (direction ? 0 : width);
-  const y = top + height/2;
+  const y = top + 20.25;
   const point = getSVGCoordinates(x, y);
   return [direction, point]
 }
 const drawWire = (event) => {
   if (startPoint) {
     const endPoint = getSVGCoordinates(event.clientX + 5, event.clientY + 5);
-    updateLine(mouseLine, startPoint, endPoint);
+    updateLine(mouseLines, startPoint, endPoint);
   }
 }
 
-const updateLine = (line, startPoint, endPoint) => {
+const updateLine = (lineGroup, startPoint, endPoint) => {
+  const lines = lineGroup.children;
+  const horizon = lines[0];
+  const vertical = lines[1];
   if (startPoint) {
-    line.setAttribute('x1', startPoint.x);
-    line.setAttribute('y1', startPoint.y);
+    horizon.setAttribute('x1', startPoint.x);
+    horizon.setAttribute('y1', startPoint.y);
+    vertical.setAttribute('y1', startPoint.y);
+    horizon.setAttribute('y2', startPoint.y);
   }
   if (endPoint) {
-    line.setAttribute('x2', endPoint.x);
-    line.setAttribute('y2', endPoint.y);
+    horizon.setAttribute('x2', endPoint.x);
+    vertical.setAttribute('x2', endPoint.x);
+    vertical.setAttribute('y2', endPoint.y);
+    vertical.setAttribute('x1', endPoint.x);
   }
 }
 
 const voltageButton = document.querySelector('img[alt="voltage-circle"]');
+const currentButton = document.querySelector('img[alt="current-circle"]');
 const cursorButton = document.querySelector('img[alt="cursor"]');
 
 voltageButton.addEventListener("click", (event) => {
-  addVoltageProbe(event);
+  addVoltageProbe();
+})
+currentButton.addEventListener("click", (event) => {
+  addCurrentProbe();
 })
 cursorButton.addEventListener("click", (event) => {
   changeCursor();
 })
 
-const addVoltageProbe = (event) => {
+const addVoltageProbe = () => {
+  board.classList.remove('probe_current');
   board.classList.add('probe_voltage');
+}
+const addCurrentProbe = () => {
+  board.classList.remove('probe_voltage');
+  board.classList.add('probe_current');
 }
 const changeCursor = () => {
   board.classList.remove('probe_voltage');
+  board.classList.remove('probe_current');
+}
+
+const setVoltageProbe = (event) => {
+  if (board.classList.contains('probe_voltage')) {
+    const position = getSVGCoordinates(event.pageX, event.pageY);
+    const wireNum = event.target.getAttribute('wireNum');
+    const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    img.setAttribute('href', '/static/images/probe-voltage.svg');
+    img.setAttribute('connectedWireNum', wireNum);
+    img.setAttribute('x', position.x);
+    img.setAttribute('y', position.y);
+    img.setAttribute('class', 'line__probe_voltage');
+    board.appendChild(img);
+  }
 }

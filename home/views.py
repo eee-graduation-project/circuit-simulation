@@ -86,9 +86,12 @@ def simulate_circuit(request):
         net.append(node_num)
       net.append(float(component.value[:-1]))
       netlist.append(net)
-    response_data = calculate_simulation(netlist)
-    print(response_data)
-    return Response(response_data, status=status.HTTP_200_OK)
+    
+    [result_source, result_node] = calculate_simulation(netlist)
+    transformed_result_source = {element: round(current, 3) for element, _, current in result_source}
+    transformed_result_node = {node: round(value, 3) for node, value in result_node}
+
+    return Response({'result_current' : transformed_result_source, 'result_node' : transformed_result_node}, status=status.HTTP_200_OK)
 # def test_example(request):
 #   if request.method != 'POST':
 #     return

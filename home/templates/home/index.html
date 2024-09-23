@@ -45,6 +45,7 @@
   </div>
   <div class="content">
     <svg class="board"></svg>
+    <div class="rightside">
     <div class="library">
       <div class="library__search">
         <div class="library__search__area">
@@ -62,6 +63,14 @@
           <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source.svg' %}" alt="current-source"></li>
         </ul>
       </div>
+    </div>
+    <div class="result">
+      <h4>Simulation Results</h4>
+      <h5>voltage of node</h5>
+      <ul class="result__voltage_list"></ul>
+      <h5>current of element</h5>
+      <ul class="result__current_list"></ul>
+    </div>
     </div>
   </div>
   <script>
