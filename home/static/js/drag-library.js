@@ -75,11 +75,11 @@ const appendWire = (elementType, elementName) => {
   if (elementType == 'ground') {
     const wire = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     wire.setAttribute('stroke', 'red');
-    wire.setAttribute('stroke-width', '4');
+    wire.setAttribute('stroke-width', '2.5');
     wire.setAttribute('draggable', false);
     wire.setAttribute('class', "board__element_wire");
-    wire.setAttribute('x1', 35);
-    wire.setAttribute('x2', 35);
+    wire.setAttribute('x1', 40);
+    wire.setAttribute('x2', 40);
     wire.setAttribute('y1', 0);
     wire.setAttribute('y2', 15);
     wire.setAttribute('wireNum', `${elementName}T`);
@@ -90,22 +90,22 @@ const appendWire = (elementType, elementName) => {
 
   const wireL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   wireL.setAttribute('stroke', 'red');
-  wireL.setAttribute('stroke-width', '4');
+  wireL.setAttribute('stroke-width', '2.5');
   wireL.setAttribute('wireNum', `${elementName}L`);
-  wireL.setAttribute('y1', 20);
-  wireL.setAttribute('y2', 20);
+  wireL.setAttribute('y1', 19);
+  wireL.setAttribute('y2', 19);
   // wireL.setAttribute('href', '/static/images/wire.svg');
   wireL.setAttribute('draggable', false);
   wireL.setAttribute('class', "board__element_wire");
 
   const wireR = wireL.cloneNode(true);
-  wireR.setAttribute('x', 55);
+  wireR.setAttribute('x', 60);
   wireR.setAttribute('wireNum', `${elementName}R`);
   
   wireL.setAttribute('x1', 0);
-  wireL.setAttribute('x2', 15);
-  wireR.setAttribute('x1', 55);
-  wireR.setAttribute('x2', 70);
+  wireL.setAttribute('x2', 20);
+  wireR.setAttribute('x1', 60);
+  wireR.setAttribute('x2', 80);
   return [wireL, wireR];
 }
 
@@ -114,24 +114,24 @@ const appendImg = (src) => {
   img.setAttribute('href', src);
   img.style.height = "40px";
   img.setAttribute('draggable', false);
-  img.setAttribute('x', 15);
+  img.setAttribute('x', 20);
   return img;
 }
 
 const appendText = (elementType, elementName) => {
   const value = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  value.setAttribute('x', '70');
-  value.setAttribute('y', '10');
+  value.setAttribute('x', '78');
+  value.setAttribute('y', '12');
   value.setAttribute('font-size', '12');
   value.setAttribute('font-weight', 'bold');
   value.setAttribute('text-anchor', 'end');
   value.setAttribute('fill', '#000000');
 
   const name = value.cloneNode(true);
-  name.setAttribute('x', '0');
+  name.setAttribute('x', '2');
   name.setAttribute('text-anchor', 'start');
   if (elementType == 'ground') {
-    name.setAttribute('x', '15');
+    name.setAttribute('x', '20');
   }
   
   value.textContent = defaultValue[elementType];
