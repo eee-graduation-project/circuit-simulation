@@ -1,9 +1,10 @@
-import {getCookie} from "./utils.js";
-import {getData} from "./data.js";
+import {getCookie, getSVGCoordinates} from "./utils.js";
+import {getData, getNodeNum} from "./data.js";
 
 const componentId = {};
 const nodeId = {};
 
+const board = document.querySelector('.board');
 const button = document.querySelector('button');
 button.addEventListener('click', () => {
   postSimulate()
@@ -49,7 +50,36 @@ const postConnection = async (duplicatedInfos) => {
 
 const getSimulate = async (boardId, groundNodeNum) => {
   const url = `/api/simulation?` + new URLSearchParams({boardId, groundNodeNum}).toString();
-  await requestAPI('GET', url);
+  const data = await requestAPI('GET', url);
+  const voltageList = document.querySelector('.result__voltage_list');
+  const currentList = document.querySelector('.result__current_list');
+  Object.entries(data.result_node).forEach(([key, value]) => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `node${key}: ${value}V`;
+    voltageList.appendChild(listItem);
+  })
+  Object.entries(data.result_current).forEach(([key, value]) => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${key}: ${value}A`;
+    currentList.appendChild(listItem);
+  })
+
+  const voltageProbes = document.querySelectorAll('.line__probe_voltage');
+  voltageProbes.forEach((voltageProbe) => {
+    const wireNum = voltageProbe.getAttribute('connectedWireNum');
+    const nodeNum = getNodeNum(wireNum);
+    const x = voltageProbe.getAttribute('x');
+    const y = voltageProbe.getAttribute('y');
+
+    const nodeName = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    nodeName.setAttribute('x', Number(x)+10);
+    nodeName.setAttribute('y', Number(y)+40);
+    nodeName.setAttribute('font-size', '12');
+    nodeName.setAttribute('font-weight', 'bold');
+    nodeName.setAttribute('fill', '#FF4C4C');
+    nodeName.textContent = `node${nodeNum}: ${data.result_node[nodeNum]}V`;
+    board.appendChild(nodeName);
+  })
 }
 
 const requestAPI = async (method, url, data) => {

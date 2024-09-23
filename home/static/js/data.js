@@ -34,6 +34,11 @@ const node2wire = {};
 let nodeNum = 1;
 let groundNodeNum = null;
 
+export const getNodeNum = (wireNum) => {
+  console.log(`wireNum ${wireNum}`)
+  console.log(wire2node);
+  return wire2node[wireNum];
+}
 export const getData = () => {
   return circuitData.getData();
 }
