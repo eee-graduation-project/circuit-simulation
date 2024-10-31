@@ -1,0 +1,16 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" transform="rotate(-90, 0, 0)">
+  <!-- circle -->
+  <circle cx="12" cy="12" r="10" stroke="#000000" stroke-width="1.5" />
+  
+  <!-- smaller plus -->
+  <line x1="10" y1="5" x2="14" y2="5" stroke="#000000" stroke-width="1" />
+  <line x1="12" y1="3" x2="12" y2="7" stroke="#000000" stroke-width="1" />
+  
+  <!-- smaller minus -->
+  <line x1="12" y1="17" x2="12" y2="21" stroke="#000000" stroke-width="1" />
+  
+  <!-- larger S-shaped signal with slight counterclockwise rotation -->
+  <path d="M5,12 C6,7 11,7 12,12 C13,17 18,17 19,12" 
+        stroke="#000000" stroke-width="1.5" fill="none" 
+        transform="rotate(-12, 12, 12)" />
+</svg>
