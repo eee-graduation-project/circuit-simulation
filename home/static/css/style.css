@@ -150,12 +150,24 @@ body {
 */
 
 /* cursor */
-.probe_voltage {
+.probe_voltage_plus {
+  cursor: url('/static/images/probe-voltage.svg'), auto;
+}
+
+.probe_voltage_minus {
   cursor: url('/static/images/probe-voltage.svg'), auto;
 }
 
 .probe_current {
   cursor: url('/static/images/probe-current.svg'), auto;
+}
+
+.probe_vout_plus {
+  cursor: url('/static/images/probe-vout.svg'), auto;
+}
+
+.probe_vout_minus {
+  cursor: url('/static/images/probe-vout.svg'), auto;
 }
 
 /* result */
@@ -170,4 +182,99 @@ body {
   /* gap: 10px; */
   word-wrap: break-word;
   word-break: break-all;
+}
+
+.clicked_element {
+  filter: invert(30%) sepia(100%) saturate(700%) hue-rotate(-50deg) brightness(95%);
+}
+
+/* 모달 배경 */
+.modal {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+/* 닫기 버튼 */
+.button__modal_close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #999;
+}
+
+/* 모달 제목 */
+.modal h4 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  color: #333;
+}
+
+/* 모달 내용 */
+.modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* 입력 필드와 레이블 */
+.modal__field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #555;
+}
+
+.modal__field input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* 저장 버튼 */
+.button__modal_save {
+  margin-top: 20px;
+  padding: 10px;
+  width: 100%;
+  background-color: #ededed60;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.button__modal_save:hover {
+  background-color: #EDEDED;
+}
+
+.analysis {
+  /* display: flex; */
+  gap: 10px;
+  /* background-color: #EDEDED; */
+  width: 208px;
+  /* flex-direction: column; */
+  height: 50%;
+  padding: 10px;
+  gap: 10px;
+}
+
+.analysis__form {
+  gap : 20px;
 }
