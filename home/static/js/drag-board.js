@@ -1,14 +1,16 @@
 import {getSVGCoordinates} from "./utils.js";
-import {addNode, addConnection} from "./data.js";
+import { circuitComponents } from "./component.js";
+import { CircuitWire, circuitWires } from "./wire.js";
+import {setProbe} from "./probe.js";
 
 let mouseLines = null;
 let startPoint = null;
-let startWireInfo = null;
-let endWireNum = null;
+// let endWireNum = null;
 let isDragging;
 let offsetX, offsetY;
 
 let boardEvent = null;
+let currComponent = null;
 let wireS = null;
 let wireE = null;
 
@@ -33,13 +35,11 @@ export const boardDragStart = (event) => {
   isDragging = true;
   offsetX = event.clientX - boardEvent.getBoundingClientRect().left;
   offsetY = event.clientY - boardEvent.getBoundingClientRect().top;
-  const num = boardEvent.getAttribute('data-id');
-  const wireSgroup = document.querySelector(`g[data-start="${num}"]`);
-  const wireEgroup = document.querySelector(`g[data-end="${num}"]`);
-  wireS = wireSgroup ? Array.from(wireSgroup.children) : [];
-  wireE = wireEgroup ? Array.from(wireEgroup.children) : [];
-  console.log(wireS);
-  console.log(wireE);
+  const dataId = boardEvent.getAttribute('data-id');
+  currComponent = circuitComponents[dataId];
+  
+  wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == dataId);
+  wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == dataId);
 }
 
 const boardDrag = (event) => {
@@ -50,22 +50,43 @@ const boardDrag = (event) => {
   const y = event.clientY - offsetY;
   const position = getSVGCoordinates(x, y);
   boardEvent.setAttribute('transform', `translate(${position.x}, ${position.y})`);
-  const {height, width} = boardEvent.getBoundingClientRect();
-  const elementType = boardEvent.getAttribute('data-type');
+  // const {height, width} = boardEvent.getBoundingClientRect();
+  const elementType = currComponent.type;
   
-  const pointL = getSVGCoordinates(x, y+height/2);
-  const pointR = getSVGCoordinates(x+width, y+height/2);
+  const lines = currComponent.svgElement.querySelectorAll('.board__element_wire');
+  const lineInfo = {}
+  Array.from(lines).forEach((line) => {
+    const direction = line.getAttribute('lineNum').slice(-1);
+    if ( direction== 'L') {
+      const {top, left, width} = line.getBoundingClientRect();
+      lineInfo['top'] = top;
+      lineInfo['left'] = left;
+      lineInfo['width'] = width;
+    }
+    else if (direction=='R') {
+      const {left} = line.getBoundingClientRect();
+      lineInfo['right'] = left;
+    }
+    else if (direction=='T') {
+      const {left, top} = line.getBoundingClientRect();
+      lineInfo['tleft'] = left;
+      lineInfo['ttop'] = top;
+    }
+  })
+  const pointL = getSVGCoordinates(lineInfo.left, lineInfo.top);
+  const pointR = getSVGCoordinates(lineInfo.right + lineInfo.width, lineInfo.top);
+  
   // element를 옮길 때 양옆에 연결된 wire를 찾아서 같이 이동시킴
-  wireS.forEach((line) => {
-    const dir = line.getAttribute('data-start-dir');
-    const point = (elementType == 'ground') ? getSVGCoordinates(x+width/2, y) : ((dir=="true") ? pointL : pointR);
-    updateLine(line, point, null);
+  wireS?.forEach((line) => {
+    const dir = line.startDir;
+    const point = (elementType == 'ground') ? getSVGCoordinates(lineInfo.tleft, lineInfo.ttop) : (dir=='L' ? pointL : pointR);
+    line.updateWire(point, null);
   })
 
-  wireE.forEach((line) => {
-    const dir = line.getAttribute('data-end-dir');
-    const point = (elementType == 'ground') ? getSVGCoordinates(x+width/2, y) : ((dir=="true") ? pointL : pointR);
-    updateLine(line, null, point);
+  wireE?.forEach((line) => {
+    const dir = line.endDir;
+    const point = (elementType == 'ground') ? getSVGCoordinates(lineInfo.tleft, lineInfo.ttop) : (dir=='L' ? pointL : pointR);
+    line.updateWire(null, point);
   })
 }
 
@@ -75,133 +96,62 @@ const boardDrop = () => {
 }
 // wire를 처음 연결
 export const startWire = (event) => {
-  const [direction, point] = getLinePosition(event.target.parentNode);
-  
+  if (board.classList.contains('probe_voltage_plus') || board.classList.contains('probe_voltage_minus') || board.classList.contains('probe_current') || board.classList.contains('probe_vout_plus') || board.classList.contains('probe_vout_minus')) {
+    return;
+  }
+  console.log(event.target);
   const dataId = event.target.parentNode.getAttribute('data-id');
-  const dataType = event.target.parentNode.getAttribute('data-type');
+  const component = circuitComponents[dataId];
+  const [direction, point] = getLinePosition(component, event.target);
+
+  const dataType = component.type;
   if (!startPoint) {
     // if (event.target.hasAttribute('node'))
-    const startWireNum = event.target.getAttribute('wireNum');
-    mouseLines = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    mouseLines.setAttribute('data-start', dataId);
-    mouseLines.setAttribute('data-start-dir', direction);
-    
-    const mouseHorizonLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    mouseHorizonLine.setAttribute('stroke', 'black');
-    mouseHorizonLine.setAttribute('stroke-width', '2.5');
-    mouseHorizonLine.setAttribute('class', 'board__wire');
-
-    const mouseVerticalLine = mouseHorizonLine.cloneNode(true);
-
-    startWireInfo = {startWireNum, dataId, direction};
-    mouseLines.append(mouseHorizonLine, mouseVerticalLine);
-    board.appendChild(mouseLines);
-    
+    mouseLines = new CircuitWire(event.target.getAttribute('wireNum'), dataId, direction);
     startPoint = point;
-    updateLine(mouseLines, startPoint, startPoint);
+    mouseLines.updateWire(startPoint, startPoint);
     event.target.setAttribute('wire', wireNum);
   }
   else {
-    mouseLines.setAttribute('data-end', dataId);
-    mouseLines.setAttribute('data-end-dir', direction);
-    mouseLines.setAttribute('wireNum', wireNum);
-    updateLine(mouseLines, startPoint, point);
+    mouseLines.setEndWire(dataId, direction, wireNum);
+    mouseLines.updateWire(startPoint, point);
     startPoint = null;
     
-    endWireNum = event.target.getAttribute('wireNum');
+    // endWireNum = event.target.getAttribute('wireNum');
     
-    addNode(wireNum, startWireInfo.startWireNum, endWireNum);
-    addConnection(wireNum, dataId, direction);
-    addConnection(wireNum, startWireInfo.dataId, startWireInfo.direction);
-
-    endWireNum = null;
-    startWireInfo = null;
+    // endWireNum = null;
 
     event.target.setAttribute('wire', wireNum);
     wireNum += 1;
 
-    mouseLines.addEventListener("click", (event) => {
-      setVoltageProbe(event)
+    mouseLines.wires.addEventListener("click", (event) => {
+      setProbe(event, 'probe_voltage_plus', 'voltagePlus');
+      setProbe(event, 'probe_voltage_minus', 'voltageMinus');
+      setProbe(event, 'probe_vout_plus', 'voutPlus');
+      setProbe(event, 'probe_vout_minus', 'voutMinus');
+      // setCurrentProbe(event)
     });
   }
 };
 
-const getLinePosition = (node) => {
-  const {top, left, width, height} = node.getBoundingClientRect();
-  const elementType = node.getAttribute('data-type');
+const getLinePosition = (component, line) => {
+  const {top, left, width, height} = line.getBoundingClientRect();
+  const elementType = component.type;
   // 1이면 왼쪽, 0이면 오른쪽
   if (elementType == 'ground') {
     const point = getSVGCoordinates(left+width/2, top+1.5);
-    return [2, point];
+    return ['T', point];
   }
-  const direction = (event.clientX < left + width/2);
-  const x = left + (direction ? 0 : width);
-  const y = top + 20.25;
+  const direction = line.getAttribute('lineNum').slice(-1);
+  const x = left + (direction=='L' ? 0 : width);
+  const y = top + height/2;
   const point = getSVGCoordinates(x, y);
   return [direction, point]
 }
+
 const drawWire = (event) => {
   if (startPoint) {
     const endPoint = getSVGCoordinates(event.clientX + 5, event.clientY + 5);
-    updateLine(mouseLines, startPoint, endPoint);
-  }
-}
-
-const updateLine = (lineGroup, startPoint, endPoint) => {
-  const lines = lineGroup.children;
-  const horizon = lines[0];
-  const vertical = lines[1];
-  if (startPoint) {
-    horizon.setAttribute('x1', startPoint.x);
-    horizon.setAttribute('y1', startPoint.y);
-    vertical.setAttribute('y1', startPoint.y);
-    horizon.setAttribute('y2', startPoint.y);
-  }
-  if (endPoint) {
-    horizon.setAttribute('x2', endPoint.x);
-    vertical.setAttribute('x2', endPoint.x);
-    vertical.setAttribute('y2', endPoint.y);
-    vertical.setAttribute('x1', endPoint.x);
-  }
-}
-
-const voltageButton = document.querySelector('img[alt="voltage-circle"]');
-const currentButton = document.querySelector('img[alt="current-circle"]');
-const cursorButton = document.querySelector('img[alt="cursor"]');
-
-voltageButton.addEventListener("click", (event) => {
-  addVoltageProbe();
-})
-currentButton.addEventListener("click", (event) => {
-  addCurrentProbe();
-})
-cursorButton.addEventListener("click", (event) => {
-  changeCursor();
-})
-
-const addVoltageProbe = () => {
-  board.classList.remove('probe_current');
-  board.classList.add('probe_voltage');
-}
-const addCurrentProbe = () => {
-  board.classList.remove('probe_voltage');
-  board.classList.add('probe_current');
-}
-const changeCursor = () => {
-  board.classList.remove('probe_voltage');
-  board.classList.remove('probe_current');
-}
-
-const setVoltageProbe = (event) => {
-  if (board.classList.contains('probe_voltage')) {
-    const position = getSVGCoordinates(event.pageX, event.pageY);
-    const wireNum = event.target.getAttribute('wireNum');
-    const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    img.setAttribute('href', '/static/images/probe-voltage.svg');
-    img.setAttribute('connectedWireNum', wireNum);
-    img.setAttribute('x', position.x);
-    img.setAttribute('y', position.y);
-    img.setAttribute('class', 'line__probe_voltage');
-    board.appendChild(img);
+    mouseLines.updateWire(startPoint, endPoint);
   }
 }
