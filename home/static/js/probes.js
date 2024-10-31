@@ -16,12 +16,9 @@ export class CircuitProbe {
       this.targetName;
       this.setPosition(position);
       this.setTarget(target);
-      console.log(circuitProbes);
-      console.log(probeNum);
   }
   
   setPosition (position) {
-    console.log(this.type);
     const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
     switch (this.type) {
       case 'voltagePlus':
@@ -55,11 +52,13 @@ export class CircuitProbe {
         // console.log(`lineNum: ${target.getAttribute('lineNum')}`);
         switch (target.getAttribute('lineNum').slice(-1)) {
           case 'L':
-            this.targetNum = `${targetDataId}-1`;
+            this.targetNum = `${targetDataId}L`;
             break;
           case 'R':
+            this.targetNum = `${targetDataId}R`;
+            break;
           case 'T':
-            this.targetNum = `${targetDataId}-0`;
+            this.targetNum = `${targetDataId}T`;
             break;
         }
         break;
