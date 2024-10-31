@@ -6,6 +6,7 @@
   <title>Circuit Simulator</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
   <div class="mainnav">
@@ -13,38 +14,60 @@
       <img src="{% static 'images/logo.svg' %}" width="20px" class="mainnav__title__logo">
       <div class="mainnav__title__text">Circuit Simulator</div>
     </div>
-    <div class="mainnav__menu">
+    {% comment %} <div class="mainnav__menu">
       <ul class="mainnav__menu__tab_list">
         <li class="mainnav__menu__tab_item">File<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
         <li class="mainnav__menu__tab_item">Edit<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
         <li class="mainnav__menu__tab_item">Run<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
       </ul>
       <div class="mainnav__menu__signin">Sign in</div>
-    </div>
+    </div> {% endcomment %}
   </div>
   <div class="subnav">
     <div class="subnav__tab">
-      <ul class="subnav__tab_list">
+      {% comment %} <ul class="subnav__tab_list">
         <li class="subnav__tab_item"><img src="{% static 'images/arrow-left.svg' %}" width="20px"></li>
         <li class="subnav__tab_item"><img src="{% static 'images/arrow-right.svg' %}" width="20px"></li>
+      </ul> {% endcomment %}
+      <ul class="subnav__tab_list">
+        <li class="subnav__tab_item"><img src="{% static 'images/rotate-cw.svg' %}" width="20px" alt="rotate"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/flip-reverse.svg' %}" width="20px" alt="flip"></li>
       </ul>
       <ul class="subnav__tab_list">
-        <li class="subnav__tab_item"><img src="{% static 'images/rotate-cw.svg' %}" width="20px"></li>
-        <li class="subnav__tab_item"><img src="{% static 'images/flip-reverse.svg' %}" width="20px"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/trash.svg' %}" width="20px" alt="trash"></li>
       </ul>
     </div>
     <div class="subnav__tab">
       <ul class="subnav__tab_list">
         <li class="subnav__tab_item"><img src="{% static 'images/cursor.svg' %}" width="20px" alt="cursor"></li>
         <li class="subnav__tab_item"><img src="{% static 'images/wiring.svg' %}" width="20px" alt="wiring"></li>
-        <li class="subnav__tab_item"><img src="{% static 'images/voltage-circle.svg' %}" width="20px" alt="voltage-circle"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/voltage-circle-plus.svg' %}" width="20px" alt="voltage-circle-plus"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/voltage-circle-minus.svg' %}" width="20px" alt="voltage-circle-minus"></li>
         <li class="subnav__tab_item"><img src="{% static 'images/current-circle.svg' %}" width="20px" alt="current-circle"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/vout-plus.svg' %}" width="20px" alt="vout-plus"></li>
+        <li class="subnav__tab_item"><img src="{% static 'images/vout-minus.svg' %}" width="20px" alt="vout-minus"></li>
       </ul>
-      <button type="button">Simulate</button>
+      {% comment %} <button type="button">Simulate</button> {% endcomment %}
     </div>
   </div>
   <div class="content">
     <svg class="board"></svg>
+    <div class="modal">
+      <span class="button__modal_close">&times;</span>
+      <h4 class="modal__element_name"></h4>
+      <div class="modal__content_toggle" style="display:none">
+        <button type="button">AC</button>
+        <button type="button">SINE</button>
+        <button type="button">PULSE</button>
+      </div>
+      <form class="modal__content">
+      </form>
+      {% comment %} <div class="modal__field"> {% endcomment %}
+        {% comment %} <label for="inputValue" id="modalText">Enter your value:</label>
+        <input type="text" id="modalInput"/> {% endcomment %}
+      {% comment %} </div> {% endcomment %}
+      <button type="submit" class="button__modal_save">Save</button>
+    </div>
     <div class="rightside">
     <div class="library">
       <div class="library__search">
@@ -61,8 +84,83 @@
           <li class="library__element_item"><img draggable="true" src="{% static 'images/inductor.svg' %}" alt="inductor"></li>
           <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source.svg' %}" alt="voltage-source"></li>
           <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source.svg' %}" alt="current-source"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-signal-source.svg' %}" alt="voltage-signal-source"></li>
+          <li class="library__element_item"><img draggable="true" src="{% static 'images/current-signal-source.svg' %}" alt="current-signal-source"></li>
         </ul>
       </div>
+    </div>
+    <div class="analysis" style="display: none;">
+      <h4>Analysis</h4>
+      <div class="analysis__mode">
+        <button type="button" class="button__mode_op">OP</button>
+        <button type="button" class="button__mode_dc">DC</button>
+        <button type="button" class="button__mode_ac">AC</button>
+        <button type="button" class="button__mode_tran">TRAN</button>
+      </div>
+      <form action='' method='POST'>
+        <fieldset data-mode="op" class="analysis__op_form">
+          <input type="hidden" name="mode" value="op" required>
+        </fieldset>
+        <fieldset data-mode="dc" class="analysis__dc_form" disabled style="display:none">
+          <input type="hidden" name="mode" value="dc" required>
+          <div class="analysis__form_content">
+            <label for="name">Name:</label>
+            <select id="name" name="name">
+            </select>
+          </div>
+          <div class="analysis__form_content">
+            <label for="start">Start Value:</label>
+            <input type="number" name="start" required>
+          </div>
+          <div class="analysis__form_content">
+            <label for="stop">Stop Value:</label>
+            <input type="number" name="stop" required>
+          </div>
+          <div class="analysis__form_content">
+            <label for="step">Step:</label>
+            <input type="number" name="step" required>
+          </div>
+        </fieldset>
+        <fieldset data-mode="ac" class="analysis__ac_form" disabled style="display:none">
+          <input type="hidden" name="mode" value="ac" required>
+          <div class="analysis__form_content">
+            <label for="type">Type:</label>
+            <select id="type" name="type">
+              <option value = "lin">lin</option>
+              <option value = "dec">dec</option>
+              <option value = "oct">oct</option>
+            </select>
+          </div>
+          <div class="analysis__form_content">
+            <label for="points">Points:</label>
+            <input type="number" name="points" required>
+          </div>
+          <div class="analysis__form_content">
+            <label for="start">Start Value:</label>
+            <input type="number" name="start" required>
+          </div>
+          <div class="analysis__form_content">
+            <label for="stop">Stop Value:</label>
+            <input type="number" name="stop" required>
+          </div>
+        </fieldset>
+        <fieldset data-mode="tran" class="analysis__tran_form" disabled style="display:none">
+          <input type="hidden" name="mode" value="tran">
+          <div class="analysis__form_content">
+            <label for="stop">Stop Time:</label>
+            <input type="number" name="stop" required>
+          </div>
+          <div class="analysis__form_content">
+            <label for="step">Step Time:</label>
+            <input type="number" name="step" required>
+          </div>
+        </fieldset>
+        <button type="submit" style="width: 100%" class="button__simulate">Run</button>
+      </form>
+    </div>
+    <div class = "toggle">
+      <button type="button" class="button__library">Library</button>
+      <button type="button" class="button__analysis">Simulate</button>
     </div>
     <div class="result">
       <h4>Simulation Results</h4>
@@ -79,5 +177,8 @@
   <script type="module" src="/static/js/drag-library.js"></script>
   <script type="module" src="/static/js/drag-board.js"></script>
   <script type="module" src="/static/js/api.js"></script>
+  <script type="module" src="/static/js/probe.js"></script>
+  <script type="module" src="/static/js/sidebar.js"></script>
+  {% comment %} <script type="module" src="/static/js/simulation-result.js"></script> {% endcomment %}
 </body>
 </html>
