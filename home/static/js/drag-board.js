@@ -99,7 +99,7 @@ export const startWire = (event) => {
   if (board.classList.contains('probe_voltage_plus') || board.classList.contains('probe_voltage_minus') || board.classList.contains('probe_current') || board.classList.contains('probe_vout_plus') || board.classList.contains('probe_vout_minus')) {
     return;
   }
-  console.log(event.target);
+  // console.log(event.target);
   const dataId = event.target.parentNode.getAttribute('data-id');
   const component = circuitComponents[dataId];
   const [direction, point] = getLinePosition(component, event.target);

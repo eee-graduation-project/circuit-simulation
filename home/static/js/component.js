@@ -31,13 +31,13 @@ export class CircuitComponent {
 
   setValue(name, value) {
     if (name=='value') {
-      console.log(this.svgElement);
+      // console.log(this.svgElement);
       this.value = value;
       const text = this.svgElement.querySelector('.component__text_value');
       text.textContent = `${this.value}${defaultValue[this.type]}`;
     }
     else {
-      console.log(this.options);
+      // console.log(this.options);
       this.options[name] = value;
       const text = this.svgElement.querySelector(`.component__option_${name}`);
       text.textContent = `${name}: ${value}`;
@@ -230,11 +230,7 @@ export class CircuitComponent {
   }
 
   setConnection(pos, comp) {
-    console.log(this.connections);
-    console.log(pos);
-    console.log(comp);
     this.connections[`${this.num}${pos}`].push(comp);
-    console.log(this.connections);
   }
 
   getData(board) {
