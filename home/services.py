@@ -3,12 +3,10 @@ from .models import Component, Wire
 def id_2_comp(components):
     id2comp = {}
     for component in components.values():
-        # print(component.items())
         id2comp[component['num']] = component
     return id2comp
 
 def dfs_node(id2comp, com2node, comps, nodeNum):
-    # component['connections']
     for comp in comps:
         id = comp[:-1]
         pos = comp[-1]
@@ -30,22 +28,8 @@ def generate_netlist(board_id):
   wires = Wire.objects.filter(board=board_id)
   
   id2comp = id_2_comp(components)
-  com2node = find_ground(id2comp, components) # 'G0'이 아니라 ground의 번호(dataId)여야 함. 일단 ground를 가장 먼저 추가하기
-  print('???')
-  # node_num = 1
-  # wire2node = {}
-
-  # # netlist
-  # for wire in wires:
-  #     startPos = f"{wire.start}{wire.startDir}"
-  #     endPos = f"{wire.end}{wire.endDir}"
-      
-  #     for pos in (startPos, endPos):
-  #       wire2node[str(wire.num)] = node_num
-  #       if not pos in com2node:
-  #         com2node[pos] = node_num
-  #     node_num += 1
-  # node
+  com2node = find_ground(id2comp, components) 
+  
   nodeNum = 1
   for component in components:
       for pos, connection in component.connections.items():

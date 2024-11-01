@@ -6,33 +6,38 @@ from rest_framework.decorators import api_view
 from .models import Component, Node, Connection, Board, Wire
 from .serializers import ComponentSerializer, NodeSerializer, ConnectionSerializer, BoardSerializer, WireSerializer
 import uuid
-import re
 import json
 from .simulation.simulation import cmd_analysis
 from .services import generate_netlist, generate_probe
-from sympy import Symbol
-from sympy import Float
-from sympy import Integer
 import numpy as np
 
-def convert_symbols_to_str(data): # by GPT
-    if isinstance(data, dict):
-        return {convert_symbols_to_str(k): convert_symbols_to_str(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [convert_symbols_to_str(i) for i in data]
-    elif isinstance(data, np.ndarray):  # NumPy 배열 처리
-        # 배열의 모든 요소를 변환
-        return [convert_symbols_to_str(item) for item in data]
-    elif isinstance(data, Symbol):
-        return str(data)  # Symbol 객체를 문자열로 변환
-    elif isinstance(data, Float):  # SymPy Float 객체 처리
-        return float(data)  # Float 객체를 float로 변환
-    elif isinstance(data, Integer) and data == Integer(0):  # SymPy Integer 0 체크
-        return 0  # SymPy의 Integer(0)을 0으로 변환
-    elif data is None:  # None을 그대로 반환
-        return None
-    else:
-        return data  # 기타 데이터는 그대로 반환
+from django.http import JsonResponse
+
+from sympy import Symbol, Float, Integer, Mul, Add, Rational, nan, I
+
+class CustomJSONEncoder(json.JSONEncoder): # by GPT
+    def default(self, obj):
+        if isinstance(obj, Symbol):
+            return str(obj)  # Symbol을 문자열로 변환
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()  # NumPy 배열을 리스트로 변환
+        elif isinstance(obj, Float):
+            return float(obj)  # Float을 일반 float로 변환
+        elif isinstance(obj, Integer) and obj == Integer(0):
+            return 0  # Integer(0)을 0으로 변환
+        elif obj is nan:
+            return None  # NaN을 None으로 변환
+        elif isinstance(obj, Rational):
+            return float(obj)  # Rational을 일반 float로 변환
+        elif isinstance(obj, Mul):
+            return {'type': 'Mul', 'args': [self.default(arg) for arg in obj.args]}  # Mul 타입 처리
+        elif isinstance(obj, Add):
+            return {'type': 'Add', 'args': [self.default(arg) for arg in obj.args]}  # Add 타입 처리
+        elif isinstance(obj, I):
+            return {'type': 'I'}  # 복소수 단위 i 처리
+        # 필요한 경우 추가적인 타입을 여기에 추가할 수 있습니다.
+        
+        return super().default(obj)  # 기본 직렬화기 사용
 
 def show_home(request):
   new_board = Board()
@@ -109,13 +114,13 @@ class BoardViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 def simulate_circuit(request):
-    print(request)
+    # print(request)
     board_id = uuid.UUID(request.GET.get('boardId'))
     analysis = request.GET.get('analysis')
     probes = json.loads(request.GET.get('probes'))
-    print(analysis)
-    print('probes:')
-    print(probes)
+    print(f"analysis : {analysis}")
+    # print('probes:')
+    # print(probes)
     # ground_num = int(request.GET.get('groundNodeNum'))
     if not board_id:
         return Response({'error': 'boardId is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -124,32 +129,17 @@ def simulate_circuit(request):
     [probeVoltage, probeCurrent, probeVout] = generate_probe(probes, com2node, wire2node)
     # calculate_simulation(analysis, netlist, probeVoltage, probeCurrent)
     
-    print(netlist)
-    print(probeVoltage)
-    print(probeCurrent)
-    print(probeVout)
-    [analysis_type, result] = cmd_analysis(netlist, analysis, probeCurrent, probeVoltage, probeVout)
-    result = json.dumps(convert_symbols_to_str(result))
-    # data = process_result(analysis_type, result)
-    print('---------------')
+    print(f"netlist : {netlist}")
+    print(f"probeV : {probeVoltage}")
+    print(f"probeI : {probeCurrent}")
+    print(f"probeVout : {probeVout}")
+    response = {'com2node': com2node, 'netlist': netlist, 'analysis': analysis, 'probeVoltage': probeVoltage, 'probeCurrent': probeCurrent, 'probeVout': probeVout}
+    try:
+      [analysis_type, result] = cmd_analysis(netlist, analysis, probeCurrent, probeVoltage, probeVout)
+      response['analysis_type'] = analysis_type
+      response['result'] = result
+    except Exception as e:
+        response['simulation error'] = str(e)
+        return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     print(result)
-    response = {'com2node': com2node, 'analysis_type': analysis_type, 'netlist': netlist, 'analysis': analysis, 'probeVoltage': probeVoltage, 'probeCurrent': probeCurrent, 'probeVout': probeVout, 'result': str(result)}
-    return Response(response)
-    # for component in components:
-    #   if component.type == 'ground':
-    #     continue
-    #   net = [component.name]
-    #   connections = Connection.objects.filter(component=component).order_by('-position')
-    #   for connection in connections:
-    #     node_num = int(connection.node.name)
-    #     if node_num==ground_num:
-    #       node_num = 0
-    #     net.append(node_num)
-    #   net.append(float(component.value[:-1]))
-    #   netlist.append(net)
-    
-    # [result_source, result_node] = calculate_simulation(netlist)
-    # transformed_result_source = {element: round(current, 3) for element, _, current in result_source}
-    # transformed_result_node = {node: round(value, 3) for node, value in result_node}
-    
-    # return Response({'result_current' : transformed_result_source, 'result_node' : transformed_result_node}, status=status.HTTP_200_OK)
+    return JsonResponse(response, encoder=CustomJSONEncoder)
