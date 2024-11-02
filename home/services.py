@@ -47,11 +47,19 @@ def generate_netlist(board_id):
       if component.type == 'ground':
           continue
       net = [component.name]
-      startPos = f"{component.num}R"
-      endPos = f"{component.num}L"
-      for pos in (startPos, endPos):
-          net.append(com2node[pos])
+
+      # node
+      for dir in ('T', 'B', 'I', 'M', 'L', 'R'):
+          pos = f"{component.num}{dir}"
+          if pos in com2node:
+            net.append(com2node[pos])
       
+      if component.type in ('current-source', 'current-signal-source', 'current-source-voltage-controlled', 'current-source-current-controlled'):
+          temp = net[1]
+          net[1] = net[2]
+          net[2] = temp
+      
+      # value & option
       if component.type in ('voltage-source', 'current-source'):
           net.append('DC')
       elif component.type in ('voltage-signal-source', 'current-signal-source'):
@@ -68,11 +76,13 @@ def generate_netlist(board_id):
               option += f"({component.options['offset']} {component.options['amplitude']} {component.options['trise']})"
           net.append(option)
           netlist.append(net)
-          print(netlist)
           continue
-      
+      elif component.type in ('current-source-voltage-controlled', 'current-source-current-controlled'):
+          net.append(component.options['name'])
       net.append(component.value)
       netlist.append(net)
+  print('netlist: ')
+  print(netlist)
   print('com2node:')
   print(com2node)
   print('wire2node:')
