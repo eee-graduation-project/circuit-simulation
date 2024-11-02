@@ -63,11 +63,20 @@ const createSelectHtml = (label) => {
 
   const labelElement = document.createElement('label');
   labelElement.textContent = label;
-  labelElement.setAttribute("for", "name");
+  labelElement.setAttribute("for", "all_components");
   fieldDiv.appendChild(labelElement);
 
-  const sources = document.getElementById("name");
-  fieldDiv.appendChild(sources.cloneNode(true));
+  const selectElement = document.createElement('select');
+  selectElement.id = "all_components";
+  fieldDiv.appendChild(selectElement);
+
+  const components = circuitComponents;
+  Object.values(components).forEach((component) => {
+    const newOption = document.createElement("option");
+    newOption.value = component.name;
+    newOption.text = component.name;
+    selectElement.appendChild(newOption);
+  })
 
   modalContent.appendChild(fieldDiv);
 }
