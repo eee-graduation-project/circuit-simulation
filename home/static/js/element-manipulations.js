@@ -57,6 +57,20 @@ const createInputHtml = (label) => {
 
   return inputElement;
 }
+const createSelectHtml = (label) => {
+  const fieldDiv = document.createElement('div');
+  fieldDiv.classList.add('modal__field');
+
+  const labelElement = document.createElement('label');
+  labelElement.textContent = label;
+  labelElement.setAttribute("for", "name");
+  fieldDiv.appendChild(labelElement);
+
+  const sources = document.getElementById("name");
+  fieldDiv.appendChild(sources.cloneNode(true));
+
+  modalContent.appendChild(fieldDiv);
+}
 export const addInputModal = (event) => {
   const dataId = event.target.parentNode.getAttribute("data-id");
   const component = circuitComponents[dataId];
@@ -69,14 +83,23 @@ export const addInputModal = (event) => {
     case 'capacitor':
     case 'resistor':
     case 'current-source':
+    case 'voltage-source-voltage-controlled':
+    case 'current-source-voltage-controlled': {
       const input = createInputHtml('value');
       input.value = component.value;
       break;
+    }
     case 'voltage-signal-source': // ac
     case 'current-signal-source':
       toggle.style.display = "block";
       const magnitudeInput = createInputHtml('magnitude');
       magnitudeInput.value = component.options.magnitude;
+      break;
+    case 'voltage-source-current-controlled':
+    case 'current-source-current-controlled':
+      const input = createInputHtml('value');
+      input.value = component.value;
+      createSelectHtml('sense');
       break;
   }
   // modalInput.value = ""; // 입력 필드 초기화

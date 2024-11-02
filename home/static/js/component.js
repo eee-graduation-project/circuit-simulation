@@ -124,42 +124,41 @@ export class CircuitComponent {
   }
 
   appendText = () => {
-    const name = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    name.setAttribute('x', '14');
-    name.setAttribute('y', '12');
-    name.setAttribute('text-anchor', 'start');
-    name.setAttribute('font-size', '12');
-    name.setAttribute('font-weight', 'bold');
-    name.setAttribute('text-anchor', 'end');
-    name.setAttribute('fill', '#000000');
-    name.textContent = this.name;
+    const name = this.createTextElement({'x': 14, 'y': 12}, this.name);
     switch (this.type) {
       case 'ground':
         name.setAttribute('x', '20');
         return [null, name, []];
       case 'voltage-signal-source':
-      case 'current-signal-source':
+      case 'current-signal-source': {
         this.options = {'type': 'AC', 'magnitude': 1}
-        const magnitude = name.cloneNode(true);
-        magnitude.setAttribute('x', '70');
-        magnitude.setAttribute('y', '2');
-        magnitude.textContent = `magnitude: ${this.options.magnitude}`
+        const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
         magnitude.setAttribute('text-anchor', 'start');
         magnitude.setAttribute('class', 'component__option_magnitude');
-
         return [null, name, [magnitude]];
+      }
+      default: {
+        const value = this.createTextElement({'x': 78, 'y': 12}, `1${defaultValue[this.type]}`);
+        value.setAttribute('class', 'component__text_value');
+        this.value = 1;
+        return [value, name, []];
+      }
     }
-    
-    const value = name.cloneNode(true);
-    value.setAttribute('x', '78');
-    value.setAttribute('class', 'component__text_value');
-    
-    value.textContent = `1${defaultValue[this.type]}`;
-    this.value = 1;
-    
-    return [value, name, []];
   }
   
+  createTextElement(position, content) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', position.x);
+    text.setAttribute('y', position.y);
+    text.setAttribute('text-anchor', 'start');
+    text.setAttribute('font-size', '12');
+    text.setAttribute('font-weight', 'bold');
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('fill', '#000000');
+    text.textContent = content;
+    return text;
+  }
+
   displayNode(nodes) {
     nodes.forEach((node, idx) => {
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
