@@ -1,7 +1,7 @@
 import { selectSource } from "./sidebar.js";
 
-const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'current-source': 'I', 'current-signal-source': 'I', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
-const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'current-source': 'A', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
+const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'V', 'voltage-source-current-controlled': 'V', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'I', 'current-source-current-controlled': 'I', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
+const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'voltage-source-voltage-controlled': '', 'voltage-source-current-controlled': '', 'current-source': 'A', 'current-signal-source': '', 'current-source-voltage-controlled': '', 'current-source-current-controlled': '', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
 const elementCnt = {'voltage': 0, 'current': 0, 'resistor': 0, 'inductor': 0, 'capacitor': 0, 'ground': 0};
 let idNum = 1;
 
@@ -73,41 +73,44 @@ export class CircuitComponent {
   }
 
   appendWire() {
-    if (this.type == 'ground') {
-      const wire = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      wire.setAttribute('stroke', 'red');
-      wire.setAttribute('stroke-width', '2.5');
-      wire.setAttribute('draggable', false);
-      wire.setAttribute('class', "board__element_wire");
-      wire.setAttribute('x1', 40);
-      wire.setAttribute('x2', 40);
-      wire.setAttribute('y1', 0);
-      wire.setAttribute('y2', 15);
-      wire.setAttribute('lineNum', `${this.name}T`);
-      this.connections[`${this.num}T`] = [];
-      return [wire];
+    switch (this.type) {
+      case 'ground':
+        const wire = this.createLineElement({'x1': 40, 'x2': 40, 'y1': 0, 'y2': 15}, 'T');
+        return [wire];
+      case 'voltage-source-voltage-controlled':
+      case 'current-source-voltage-controlled': {
+        const wireI = this.createLineElement({'x1': 0, 'x2': 20, 'y1': 5, 'y2': 5}, 'I');
+        const wireM = this.createLineElement({'x1': 0, 'x2': 20, 'y1': 34, 'y2': 34}, 'M');
+        const wireT = this.createLineElement({'x1': 46, 'x2': 46, 'y1': -15, 'y2': 1}, 'T');
+        const wireB = this.createLineElement({'x1': 46, 'x2': 46, 'y1': 39, 'y2': 55}, 'B');
+        return [wireI, wireM, wireT, wireB];
+      }
+      case 'voltage-source-current-controlled':
+      case 'current-source-current-controlled': {
+        const wireT = this.createLineElement({'x1': 32.5, 'x2': 32.5, 'y1': -15, 'y2': 1}, 'T');
+        const wireB = this.createLineElement({'x1': 32.5, 'x2': 32.5, 'y1': 39, 'y2': 55}, 'B');
+        return [wireT, wireB];
+      }
+      default:
+        const wireL = this.createLineElement({'x1': 0, 'x2': 19, 'y1': 20, 'y2': 20}, 'L');
+        const wireR = this.createLineElement({'x1': 60, 'x2': 80, 'y1': 20, 'y2': 20}, 'R');
+        return [wireL, wireR];
     }
+  }
 
-    const wireL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    wireL.setAttribute('stroke', 'red');
-    wireL.setAttribute('stroke-width', '2.5');
-    wireL.setAttribute('lineNum', `${this.name}L`);
-    wireL.setAttribute('y1', 19);
-    wireL.setAttribute('y2', 19);
-    wireL.setAttribute('draggable', false);
-    wireL.setAttribute('class', "board__element_wire");
-    this.connections[`${this.num}L`] = [];
-
-    const wireR = wireL.cloneNode(true);
-    wireR.setAttribute('x', 60);
-    wireR.setAttribute('lineNum', `${this.name}R`);
-    
-    wireL.setAttribute('x1', 0);
-    wireL.setAttribute('x2', 20);
-    wireR.setAttribute('x1', 60);
-    wireR.setAttribute('x2', 80);
-    this.connections[`${this.num}R`] = [];
-    return [wireL, wireR];
+  createLineElement = (position, direction) => {
+    const wire = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    wire.setAttribute('stroke', 'red');
+    wire.setAttribute('stroke-width', '2.5');
+    wire.setAttribute('draggable', false);
+    wire.setAttribute('class', "board__element_wire");
+    wire.setAttribute('x1', position.x1);
+    wire.setAttribute('x2', position.x2);
+    wire.setAttribute('y1', position.y1);
+    wire.setAttribute('y2', position.y2);
+    wire.setAttribute('lineNum', `${this.name}${direction}`);
+    this.connections[`${this.num}${direction}`] = [];
+    return wire;
   }
 
   appendImg = () => {
@@ -121,42 +124,41 @@ export class CircuitComponent {
   }
 
   appendText = () => {
-    const name = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    name.setAttribute('x', '14');
-    name.setAttribute('y', '12');
-    name.setAttribute('text-anchor', 'start');
-    name.setAttribute('font-size', '12');
-    name.setAttribute('font-weight', 'bold');
-    name.setAttribute('text-anchor', 'end');
-    name.setAttribute('fill', '#000000');
-    name.textContent = this.name;
+    const name = this.createTextElement({'x': 14, 'y': 12}, this.name);
     switch (this.type) {
       case 'ground':
         name.setAttribute('x', '20');
         return [null, name, []];
       case 'voltage-signal-source':
-      case 'current-signal-source':
+      case 'current-signal-source': {
         this.options = {'type': 'AC', 'magnitude': 1}
-        const magnitude = name.cloneNode(true);
-        magnitude.setAttribute('x', '70');
-        magnitude.setAttribute('y', '2');
-        magnitude.textContent = `magnitude: ${this.options.magnitude}`
+        const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
         magnitude.setAttribute('text-anchor', 'start');
         magnitude.setAttribute('class', 'component__option_magnitude');
-
         return [null, name, [magnitude]];
+      }
+      default: {
+        const value = this.createTextElement({'x': 78, 'y': 12}, `1${defaultValue[this.type]}`);
+        value.setAttribute('class', 'component__text_value');
+        this.value = 1;
+        return [value, name, []];
+      }
     }
-    
-    const value = name.cloneNode(true);
-    value.setAttribute('x', '78');
-    value.setAttribute('class', 'component__text_value');
-    
-    value.textContent = `1${defaultValue[this.type]}`;
-    this.value = 1;
-    
-    return [value, name, []];
   }
   
+  createTextElement(position, content) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', position.x);
+    text.setAttribute('y', position.y);
+    text.setAttribute('text-anchor', 'start');
+    text.setAttribute('font-size', '12');
+    text.setAttribute('font-weight', 'bold');
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('fill', '#000000');
+    text.textContent = content;
+    return text;
+  }
+
   displayNode(nodes) {
     nodes.forEach((node, idx) => {
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');

@@ -3,12 +3,10 @@ from .models import Component, Wire
 def id_2_comp(components):
     id2comp = {}
     for component in components.values():
-        # print(component.items())
         id2comp[component['num']] = component
     return id2comp
 
 def dfs_node(id2comp, com2node, comps, nodeNum):
-    # component['connections']
     for comp in comps:
         id = comp[:-1]
         pos = comp[-1]
@@ -30,22 +28,8 @@ def generate_netlist(board_id):
   wires = Wire.objects.filter(board=board_id)
   
   id2comp = id_2_comp(components)
-  com2node = find_ground(id2comp, components) # 'G0'이 아니라 ground의 번호(dataId)여야 함. 일단 ground를 가장 먼저 추가하기
-  print('???')
-  # node_num = 1
-  # wire2node = {}
-
-  # # netlist
-  # for wire in wires:
-  #     startPos = f"{wire.start}{wire.startDir}"
-  #     endPos = f"{wire.end}{wire.endDir}"
-      
-  #     for pos in (startPos, endPos):
-  #       wire2node[str(wire.num)] = node_num
-  #       if not pos in com2node:
-  #         com2node[pos] = node_num
-  #     node_num += 1
-  # node
+  com2node = find_ground(id2comp, components) 
+  
   nodeNum = 1
   for component in components:
       for pos, connection in component.connections.items():
@@ -63,11 +47,19 @@ def generate_netlist(board_id):
       if component.type == 'ground':
           continue
       net = [component.name]
-      startPos = f"{component.num}R"
-      endPos = f"{component.num}L"
-      for pos in (startPos, endPos):
-          net.append(com2node[pos])
+
+      # node
+      for dir in ('T', 'B', 'I', 'M', 'L', 'R'):
+          pos = f"{component.num}{dir}"
+          if pos in com2node:
+            net.append(com2node[pos])
       
+      if component.type in ('current-source', 'current-signal-source', 'current-source-voltage-controlled', 'current-source-current-controlled'):
+          temp = net[1]
+          net[1] = net[2]
+          net[2] = temp
+      
+      # value & option
       if component.type in ('voltage-source', 'current-source'):
           net.append('DC')
       elif component.type in ('voltage-signal-source', 'current-signal-source'):
@@ -84,11 +76,13 @@ def generate_netlist(board_id):
               option += f"({component.options['offset']} {component.options['amplitude']} {component.options['trise']})"
           net.append(option)
           netlist.append(net)
-          print(netlist)
           continue
-      
+      elif component.type in ('current-source-voltage-controlled', 'current-source-current-controlled'):
+          net.append(component.options['name'])
       net.append(component.value)
       netlist.append(net)
+  print('netlist: ')
+  print(netlist)
   print('com2node:')
   print(com2node)
   print('wire2node:')

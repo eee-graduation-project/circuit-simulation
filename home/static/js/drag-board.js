@@ -57,30 +57,38 @@ const boardDrag = (event) => {
   const lineInfo = {}
   Array.from(lines).forEach((line) => {
     const direction = line.getAttribute('lineNum').slice(-1);
-    if ( direction== 'L') {
-      const {top, left, width} = line.getBoundingClientRect();
-      lineInfo['top'] = top;
-      lineInfo['left'] = left;
-      lineInfo['width'] = width;
-    }
-    else if (direction=='R') {
-      const {left} = line.getBoundingClientRect();
-      lineInfo['right'] = left;
-    }
-    else if (direction=='T') {
-      const {left, top} = line.getBoundingClientRect();
-      lineInfo['tleft'] = left;
-      lineInfo['ttop'] = top;
-    }
+    lineInfo[direction] = line.getBoundingClientRect();
   })
-  const pointL = getSVGCoordinates(lineInfo.left, lineInfo.top);
-  const pointR = getSVGCoordinates(lineInfo.right + lineInfo.width, lineInfo.top);
+  console.log(lineInfo);
+  const pointL = getSVGCoordinates(lineInfo.L?.left, lineInfo.L?.top);
+  const pointR = getSVGCoordinates(lineInfo.R?.left + lineInfo.R?.width, lineInfo.R?.top);
+  const pointT = getSVGCoordinates(lineInfo.T?.left, lineInfo.T?.top);
+  const pointB = getSVGCoordinates(lineInfo.B?.left, lineInfo.B?.bottom);
+  const pointI = getSVGCoordinates(lineInfo.I?.left, lineInfo.I?.top);
+  const pointM = getSVGCoordinates(lineInfo.M?.left + lineInfo.M?.width, lineInfo.M?.top);
   
   // element를 옮길 때 양옆에 연결된 wire를 찾아서 같이 이동시킴
   wireS?.forEach((line) => {
     const dir = line.startDir;
-    const point = (elementType == 'ground') ? getSVGCoordinates(lineInfo.tleft, lineInfo.ttop) : (dir=='L' ? pointL : pointR);
-    line.updateWire(point, null);
+    switch (dir) {
+      case 'L':
+        line.updateWire(pointL, null);
+        break;
+      case 'R':
+        line.updateWire(pointR, null);
+        break;
+      case 'T':
+        line.updateWire(pointT, null);
+        break;
+      case 'B':
+        line.updateWire(pointB, null);
+        break;
+      case 'I':
+        line.updateWire(pointI, null);
+        break;
+      case 'M':
+        line.updateWire(pointM, null);
+    }
   })
 
   wireE?.forEach((line) => {
@@ -102,7 +110,7 @@ export const startWire = (event) => {
   // console.log(event.target);
   const dataId = event.target.parentNode.getAttribute('data-id');
   const component = circuitComponents[dataId];
-  const [direction, point] = getLinePosition(component, event.target);
+  const [direction, point] = getLinePosition(event.target);
 
   const dataType = component.type;
   if (!startPoint) {
@@ -134,18 +142,26 @@ export const startWire = (event) => {
   }
 };
 
-const getLinePosition = (component, line) => {
-  const {top, left, width, height} = line.getBoundingClientRect();
-  const elementType = component.type;
-  // 1이면 왼쪽, 0이면 오른쪽
-  if (elementType == 'ground') {
-    const point = getSVGCoordinates(left+width/2, top+1.5);
-    return ['T', point];
-  }
+const getLinePosition = (line) => {
+  const {top, bottom, left, width, height} = line.getBoundingClientRect();
+  let point;
   const direction = line.getAttribute('lineNum').slice(-1);
-  const x = left + (direction=='L' ? 0 : width);
-  const y = top + height/2;
-  const point = getSVGCoordinates(x, y);
+  switch (direction) {
+    case 'L':
+    case 'I':
+    case 'M':
+      point = getSVGCoordinates(left, top+height/2);
+      break;
+    case 'R':
+      point = getSVGCoordinates(left + width, top+height/2);
+      break;
+    case 'T':
+      point = getSVGCoordinates(left+width/2, top+1.5);
+      break;
+    case 'B':
+      point = getSVGCoordinates(left+width/2, bottom);
+      break;
+  }
   return [direction, point]
 }
 

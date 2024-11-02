@@ -1,0 +1,7 @@
+<svg width="50" height="80" viewBox="0 0 40 68" xmlns="http://www.w3.org/2000/svg">
+    <g xmlns="http://www.w3.org/2000/svg" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" transform="translate(-5, -16.5)">
+    <path fill="none" stroke="#000000" d="M25,18.74993L43.749981,50L25,81.25002L6.250019,50L25,18.74993" stroke-width="3.5" stroke-linecap="round" style="stroke-linecap: round;;"/>
+    <path fill="none" stroke="#000000" d="M 25 56.25 L 25 34.375" stroke-width="3.5" stroke-linecap="round" style="stroke-linecap: round;"></path>
+    <path fill="#000000" stroke="none" d="M 20 48.125 C 23.125 54.375 23.125 56.25 25 65.625 C 26.875 56.25 26.875 54.375 30 48.125 C 26.25 49.375 23.75 49.375 20 48.125"/>
+</g>
+</svg>
