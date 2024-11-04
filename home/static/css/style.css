@@ -101,7 +101,7 @@ body {
   background-color: #EDEDED;
   width: fit-content;
   flex-direction: column;
-  height: 50%;
+  height: 60%;
   padding: 10px;
   gap: 10px;
 }
@@ -177,7 +177,7 @@ body {
   background-color: #FFFFFF;
   /* width: fit-content; */
   flex-direction: column;
-  height: 50%;
+  height: 40%;
   padding: 10px;
   /* gap: 10px; */
   word-wrap: break-word;

@@ -1,6 +1,6 @@
 import { selectSource } from "./sidebar.js";
 
-const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'V', 'voltage-source-current-controlled': 'V', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'I', 'current-source-current-controlled': 'I', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
+const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'E', 'voltage-source-current-controlled': 'G', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'F', 'current-source-current-controlled': 'H', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
 const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'voltage-source-voltage-controlled': '', 'voltage-source-current-controlled': '', 'current-source': 'A', 'current-signal-source': '', 'current-source-voltage-controlled': '', 'current-source-current-controlled': '', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
 const elementCnt = {'voltage': 0, 'current': 0, 'resistor': 0, 'inductor': 0, 'capacitor': 0, 'ground': 0};
 let idNum = 1;
@@ -31,13 +31,11 @@ export class CircuitComponent {
 
   setValue(name, value) {
     if (name=='value') {
-      // console.log(this.svgElement);
       this.value = value;
       const text = this.svgElement.querySelector('.component__text_value');
       text.textContent = `${this.value}${defaultValue[this.type]}`;
     }
     else {
-      // console.log(this.options);
       this.options[name] = value;
       const text = this.svgElement.querySelector(`.component__option_${name}`);
       text.textContent = `${name}: ${value}`;
@@ -65,10 +63,6 @@ export class CircuitComponent {
       svgElement.append(this.img, value, name, ...options, ...this.wires);
       board.appendChild(svgElement);
       
-      // svgElement.addEventListener('dblclick', () => {
-      //     this.handleDoubleClick();
-      // });
-
       return svgElement;
   }
 
@@ -137,6 +131,15 @@ export class CircuitComponent {
         magnitude.setAttribute('class', 'component__option_magnitude');
         return [null, name, [magnitude]];
       }
+      case 'voltage-source-current-controlled':
+      case 'current-source-current-controlled':
+        const value = this.createTextElement({'x': 78, 'y': 12}, `1${defaultValue[this.type]}`);
+        value.setAttribute('class', 'component__text_value');
+        this.value = 1;
+        const sense = this.createTextElement({'x': 70, 'y': 2}, `SELECT YOUR SENSE`);
+        sense.setAttribute('text-anchor', 'start');
+        sense.setAttribute('class', 'component__option_sense');
+        return [value, name, [sense]]
       default: {
         const value = this.createTextElement({'x': 78, 'y': 12}, `1${defaultValue[this.type]}`);
         value.setAttribute('class', 'component__text_value');
@@ -159,7 +162,8 @@ export class CircuitComponent {
     return text;
   }
 
-  displayNode(nodes) {
+  //TODO controlled source node 표시
+  displayNode(type, nodes) {
     nodes.forEach((node, idx) => {
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', idx == 0 ? '75':'14');
@@ -173,23 +177,7 @@ export class CircuitComponent {
       this.svgElement.appendChild(text);
     })
   }
-  // handleDoubleClick() {
-  //     // 더블 클릭 시 실행할 로직
-  //     console.log(`Component ${this.num} double-clicked!`);
-  //     // 예를 들어, 값을 수정하는 모달을 띄우는 코드 추가
-  // }
-
-  setPosition(x, y) {
-      this.position.x = x;
-      this.position.y = y;
-      this.updateSVG();
-  }
-
-  updateSVG() {
-      // SVG 업데이트 로직
-      this.svgElement.setAttribute('transform', `translate(${this.position.x}, ${this.position.y})`);
-  }
-
+  
   addWire(wire) {
       this.wires.push(wire);
   }

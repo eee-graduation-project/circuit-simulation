@@ -100,6 +100,7 @@ const generateOpResult = (result) => {
     const listItem = document.createElement('li');
     listItem.textContent = `node${key}: ${value}V`;
     voltageList.appendChild(listItem);
+    console.log(listItem);
   });
   Object.entries(result.current).forEach(([key, value]) => {
     const listItem = document.createElement('li');
@@ -115,12 +116,22 @@ const displayNode = (com2node) => {
       case 'ground':
         node.push(com2node[`${component.num}T`]);
         break;
+      case 'voltage-source-voltage-controlled':
+      case 'current-source-voltage-controlled':
+        node.push(com2node[`${component.num}I`]);
+        node.push(com2node[`${component.num}M`]);
+        node.push(com2node[`${component.num}T`]);
+        node.push(com2node[`${component.num}B`]);
+      case 'voltage-source-current-controlled':
+      case 'current-source-current-controlled':
+        node.push(com2node[`${component.num}T`]);
+        node.push(com2node[`${component.num}B`]);
       default:
         node.push(com2node[`${component.num}R`]);
         node.push(com2node[`${component.num}L`]);
         break;
     }
-    component.displayNode(node);
+    component.displayNode(component.type, node);
   })
 }
 
@@ -131,7 +142,7 @@ const getSimulate = async (boardId, analysis, probes) => {
   displayNode(data.com2node);
   switch (data['analysis_type']) {
     case '.op':
-      generateOpResult(JSON.parse(data.result));
+      generateOpResult(data.result);
       break;
     case '.dc':
       break;
