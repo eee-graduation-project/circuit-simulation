@@ -43,7 +43,6 @@ def generate_netlist(board_id):
       wire2node[wire.num] = com2node[startPos]
   
   for component in components:
-      # print(component)
       if component.type == 'ground':
           continue
       net = [component.name]
@@ -77,8 +76,8 @@ def generate_netlist(board_id):
           net.append(option)
           netlist.append(net)
           continue
-      elif component.type in ('current-source-voltage-controlled', 'current-source-current-controlled'):
-          net.append(component.options['name'])
+      elif component.type in ('voltage-source-current-controlled', 'current-source-current-controlled'):
+          net.append(component.options['sense'])
       net.append(component.value)
       netlist.append(net)
   print('netlist: ')

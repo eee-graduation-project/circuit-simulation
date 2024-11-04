@@ -59,7 +59,6 @@ const boardDrag = (event) => {
     const direction = line.getAttribute('lineNum').slice(-1);
     lineInfo[direction] = line.getBoundingClientRect();
   })
-  console.log(lineInfo);
   const pointL = getSVGCoordinates(lineInfo.L?.left, lineInfo.L?.top);
   const pointR = getSVGCoordinates(lineInfo.R?.left + lineInfo.R?.width, lineInfo.R?.top);
   const pointT = getSVGCoordinates(lineInfo.T?.left, lineInfo.T?.top);
@@ -93,8 +92,25 @@ const boardDrag = (event) => {
 
   wireE?.forEach((line) => {
     const dir = line.endDir;
-    const point = (elementType == 'ground') ? getSVGCoordinates(lineInfo.tleft, lineInfo.ttop) : (dir=='L' ? pointL : pointR);
-    line.updateWire(null, point);
+    switch (dir) {
+      case 'L':
+        line.updateWire(null, pointL);
+        break;
+      case 'R':
+        line.updateWire(null, pointR);
+        break;
+      case 'T':
+        line.updateWire(null, pointT);
+        break;
+      case 'B':
+        line.updateWire(null, pointB);
+        break;
+      case 'I':
+        line.updateWire(null, pointI);
+        break;
+      case 'M':
+        line.updateWire(null, pointM);
+    }
   })
 }
 

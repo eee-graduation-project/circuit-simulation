@@ -68,6 +68,7 @@ const createSelectHtml = (label) => {
 
   const selectElement = document.createElement('select');
   selectElement.id = "all_components";
+  selectElement.name = label;
   fieldDiv.appendChild(selectElement);
 
   const components = circuitComponents;
