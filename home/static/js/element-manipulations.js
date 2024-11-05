@@ -114,19 +114,21 @@ export const addInputModal = (event) => {
   }
   // modalInput.value = ""; // 입력 필드 초기화
   modal.style.display = "block";
-  saveInput(component);
+  component.svgElement.classList.add("modify-input");
+  // saveInput(component);
 }
 
-const saveInput = (component) => {
+export const saveInput = () => {
+  event.preventDefault();
+  const component = circuitComponents[document.querySelector(".modify-input").getAttribute('data-id')];
   const saveButton = document.querySelector(".button__modal_save");
   const inputForm = document.querySelector(".modal__content");
   
-  saveButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    Array.from(inputForm.elements).forEach((element) => {
-      component.setValue(element.name, element.value);
-    })
-  });
+  Array.from(inputForm.elements).forEach((element) => {
+    component.setValue(element.name, element.value);
+  })
+
+  component.svgElement.classList.remove("modify-input");
   // closeModal();
 }
 

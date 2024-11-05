@@ -1,6 +1,6 @@
 import {getSVGCoordinates} from "./utils.js";
 import {boardDragStart, startWire} from "./drag-board.js";
-import { addInputModal, selectElement } from "./element-manipulations.js";
+import { addInputModal, selectElement, saveInput } from "./element-manipulations.js";
 import {CircuitComponent} from "./component.js"
 import {setProbe} from "./probe.js";
 
@@ -58,3 +58,7 @@ const drop = (event) => {
   
   elementEvent = null;
 }
+
+
+const saveButton = document.querySelector(".button__modal_save");
+saveButton.addEventListener("click", saveInput);
