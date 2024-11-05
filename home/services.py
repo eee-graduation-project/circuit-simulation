@@ -19,7 +19,7 @@ def find_ground(id2comp, components):
     com2node = {}
     for component in components.values():
         if (component['type'] == 'ground'):
-            dfs_node(id2comp, com2node, component['connections'][f'{component['num']}T'], 0)
+            dfs_node(id2comp, com2node, component['connections'][f"{component['num']}T"], 0)
     return com2node
 
 def generate_netlist(board_id):
@@ -34,6 +34,7 @@ def generate_netlist(board_id):
   for component in components:
       for pos, connection in component.connections.items():
           if (pos in com2node): continue
+          com2node[pos] = nodeNum
           dfs_node(id2comp, com2node, connection, nodeNum)
           nodeNum+=1
   
@@ -82,10 +83,6 @@ def generate_netlist(board_id):
       netlist.append(net)
   print('netlist: ')
   print(netlist)
-  print('com2node:')
-  print(com2node)
-  print('wire2node:')
-  print(wire2node)
 
   return [netlist, com2node, wire2node]
 
@@ -126,8 +123,3 @@ def generate_probe(probes, com2node, wire2node):
           probeVout.append(node)
   
   return [probeVoltage, probeCurrent, probeVout]
-
-def process_result(analysis_type, result):
-    # dc
-    if (analysis_type == '.dc'):
-        pass
