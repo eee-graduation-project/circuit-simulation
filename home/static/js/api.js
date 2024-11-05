@@ -2,7 +2,7 @@ import {getCookie} from "./utils.js";
 import { circuitComponents } from "./component.js";
 import { circuitWires } from "./wire.js";
 import { circuitProbes } from "./probes.js";
-import { generateDcResult, generateOpResult } from "./draw-graph.js";
+import { generateAcResult, generateDcResult, generateOpResult, generateTranResult } from "./draw-graph.js";
 
 const runButton = document.querySelector('.button__simulate');
 
@@ -128,8 +128,10 @@ const getSimulate = async (boardId, analysis, probes) => {
       generateDcResult(data.probeVoltage, data.probeCurrent, data.result);
       break;
     case '.ac':
+      generateAcResult(data.probeVout, data.result);
       break;
     case '.tran':
+      generateTranResult(data.probeVoltage, data.probeCurrent, data.result);
       break;
   }
 }
@@ -147,3 +149,9 @@ const requestAPI = async (method, url, data) => {
   const response = await fetch(url, request);
   return response.json();
 }
+
+const closeButton = document.querySelector(".graph__button_close");
+closeButton.addEventListener("click", () => {
+  const graph = document.querySelector(".graph__container");
+  graph.style.display = "none";
+});

@@ -13,7 +13,7 @@ import numpy as np
 
 from django.http import JsonResponse
 
-from sympy import Symbol, Float, Integer, Mul, Add, Rational, nan, I
+from sympy import Symbol, Float, Integer, Mul, Add, Rational, nan, I, pi, Pow, Basic
 
 class CustomJSONEncoder(json.JSONEncoder): # by GPT
     def default(self, obj):
@@ -33,8 +33,15 @@ class CustomJSONEncoder(json.JSONEncoder): # by GPT
             return {'type': 'Mul', 'args': [self.default(arg) for arg in obj.args]}  # Mul 타입 처리
         elif isinstance(obj, Add):
             return {'type': 'Add', 'args': [self.default(arg) for arg in obj.args]}  # Add 타입 처리
-        elif isinstance(obj, I):
-            return {'type': 'I'}  # 복소수 단위 i 처리
+        elif isinstance(obj, Pow):
+            base, exp = obj.as_base_exp()
+            return {'type': 'Pow', 'base': self.default(base), 'exp': self.default(exp)}
+        elif obj == I:  # 복소수 단위 I 처리
+            return {'type': 'I'}  
+        elif obj == pi:  # 파이 처리
+            return {'type': 'Pi', 'value': float(pi)}  # Pi를 변환
+        elif isinstance(obj, Basic):
+            return str(obj)  # 필요에 따라 Basic을 문자열 또는 특정 형식으로 변환 가능
         # 필요한 경우 추가적인 타입을 여기에 추가할 수 있습니다.
         
         return super().default(obj)  # 기본 직렬화기 사용

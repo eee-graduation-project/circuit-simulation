@@ -299,6 +299,19 @@ body {
   z-index: 1000;
 }
 
+.graph__close {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.graph__button_close:hover {
+  color: #ff3333;
+}
+
 .graph__container label {
   font-weight: bold;
   color: #333;
