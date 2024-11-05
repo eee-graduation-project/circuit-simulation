@@ -140,6 +140,6 @@ def simulate_circuit(request):
       response['result'] = result
     except Exception as e:
         response['simulation error'] = str(e)
-        return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR, encoder=CustomJSONEncoder)
     print(result)
     return JsonResponse(response, encoder=CustomJSONEncoder)
