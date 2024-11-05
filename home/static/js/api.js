@@ -2,6 +2,7 @@ import {getCookie} from "./utils.js";
 import { circuitComponents } from "./component.js";
 import { circuitWires } from "./wire.js";
 import { circuitProbes } from "./probes.js";
+import { generateDcResult, generateOpResult } from "./draw-graph.js";
 
 const runButton = document.querySelector('.button__simulate');
 
@@ -58,8 +59,8 @@ const addAnalysis = async () => {
       return `.${fieldsetElement.mode} ${fieldsetElement.stop} ${fieldsetElement.step}`;
   }
 }
+
 const postSimulate = async () => {
-  // const data = getData();
   try {
     if (temp==0)
       await Promise.all([postComponent(Object.values(circuitComponents)), postWire(Object.values(circuitWires))]);
@@ -78,35 +79,14 @@ const postComponent = async (components) => {
   const data = components.map((component) => {
     return component.getData(window.boardId);
   });
-  const result = await requestAPI('POST', '/api/component/', data);
-  // result.forEach((r) => {
-  //   componentId[r.name] = r.num;
-  // });
-  console.log(result);
+  await requestAPI('POST', '/api/component/', data);
 }
 
 const postWire = async (wires) => {
   const data = wires.map((wire) => {
     return {num: wire.num, start: wire.start, startDir: wire.startDir, end: wire.end, endDir: wire.endDir, board: window.boardId}
   });
-  const result = await requestAPI('POST', '/api/wire/', data);
-  console.log(result);
-}
-
-const generateOpResult = (result) => {
-  const voltageList = document.querySelector('.result__voltage_list');
-  const currentList = document.querySelector('.result__current_list');
-  Object.entries(result.voltage).forEach(([key, value]) => {
-    const listItem = document.createElement('li');
-    listItem.textContent = `node${key}: ${value}V`;
-    voltageList.appendChild(listItem);
-    console.log(listItem);
-  });
-  Object.entries(result.current).forEach(([key, value]) => {
-    const listItem = document.createElement('li');
-    listItem.textContent = `${key}: ${value}A`;
-    currentList.appendChild(listItem);
-  });
+  await requestAPI('POST', '/api/wire/', data);
 }
 
 const displayNode = (com2node) => {
@@ -145,28 +125,13 @@ const getSimulate = async (boardId, analysis, probes) => {
       generateOpResult(data.result);
       break;
     case '.dc':
+      generateDcResult(data.probeVoltage, data.probeCurrent, data.result);
       break;
     case '.ac':
       break;
     case '.tran':
       break;
   }
-  // const voltageProbes = document.querySelectorAll('.line__probe_voltage');
-  // voltageProbes.forEach((voltageProbe) => {
-  //   const wireNum = voltageProbe.getAttribute('connectedWireNum');
-  //   const nodeNum = getNodeNum(wireNum);
-  //   const x = voltageProbe.getAttribute('x');
-  //   const y = voltageProbe.getAttribute('y');
-
-  //   const nodeName = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  //   nodeName.setAttribute('x', Number(x)+10);
-  //   nodeName.setAttribute('y', Number(y)+40);
-  //   nodeName.setAttribute('font-size', '12');
-  //   nodeName.setAttribute('font-weight', 'bold');
-  //   nodeName.setAttribute('fill', '#FF4C4C');
-  //   nodeName.textContent = `node${nodeNum}: ${data.result_node[nodeNum]}V`;
-  //   board.appendChild(nodeName);
-  // })
 }
 
 const requestAPI = async (method, url, data) => {
