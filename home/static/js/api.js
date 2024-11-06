@@ -56,7 +56,7 @@ const addAnalysis = async () => {
     case 'ac':
       return `.${fieldsetElement.mode} ${fieldsetElement.type} ${fieldsetElement.points} ${fieldsetElement.start} ${fieldsetElement.stop}`;
     case 'tran':
-      return `.${fieldsetElement.mode} ${fieldsetElement.stop} ${fieldsetElement.step}`;
+      return `.${fieldsetElement.mode} ${fieldsetElement.step} ${fieldsetElement.stop}`;
   }
 }
 
@@ -128,7 +128,7 @@ const getSimulate = async (boardId, analysis, probes) => {
       generateDcResult(data.probeVoltage, data.probeCurrent, data.result);
       break;
     case '.ac':
-      generateAcResult(data.probeVout, data.result);
+      generateAcResult(data.result);
       break;
     case '.tran':
       generateTranResult(data.probeVoltage, data.probeCurrent, data.result);

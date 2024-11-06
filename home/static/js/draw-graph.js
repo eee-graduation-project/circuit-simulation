@@ -56,7 +56,27 @@ export const generateDcResult = (probeVoltage, probeCurrent, data) => {
   selectGraph();
 }
 
-export const generateAcResult = (probeVout, data) => {
+export const generateAcResult = (data) => {
+  const graphContainer = document.querySelector('.graph__container');
+  graphContainer.style.display = 'flex';
+
+  const mData = data.magnitude.map((y, idx) => ({
+    x: data.freq[idx], y: y
+  }));
+  drawGraph('magnitude', mData, 'freq', 'magnitude');
+
+  const pData = data.phase.map((y, idx) => ({
+    x: data.freq[idx], y: y
+  }));
+  drawGraph('phase',pData, 'freq', 'phase');
+  
+  if (data.magnitude) {
+    const key = `magnitude`;
+    const graph = document.getElementById(`graph__figure_${key}`);
+    graph.style.display = "flex";
+  }
+
+  selectGraph();
 }
 
 export const generateTranResult = (probeVoltage, probeCurrent, data) => {
@@ -111,9 +131,11 @@ const drawGraph = (key, data, xLabel, yLabel) => {
 
   const plot = Plot.plot({
     marks: [
-      Plot.line(data, { x: "x", y: "y", curve: "catmull-rom", tension: 0.5, stroke: "blue", strokeWidth: 2, channels: {x: "x", y: "y"}, tip: true }),
+      Plot.ruleY([0]),
+      Plot.ruleX([0]),
+      Plot.line(data, { x: "x", y: "y", curve: "catmull-rom", tension: 0.5, stroke: "blue", strokeWidth: 2, channels: {x: "x", y: "y"}, tooltip: d => `(${d.x}, ${d.y})` }),
       Plot.dot(data, { x: "x", y: "y", fill: "blue", r: 3, channels: {x: "x", y: "y"}, tip: true }),
-      Plot.crosshair(data, {x: "x", y: "y"})
+      Plot.crosshair(data, {x: "x", y: "y"}),
     ],
     x: { label: xLabel },
     y: { label: yLabel }
