@@ -145,6 +145,7 @@ const drawGraph = (key, data, xLabel, yLabel) => {
   plot.style.display = "none";
   plot.id = `graph__figure_${key}`;
   graph.appendChild(plot);
+  console.log(plot);
 }
 
 const selectGraph = () => {
