@@ -1,8 +1,9 @@
 import {getSVGCoordinates} from "./utils.js";
 import {boardDragStart, startWire} from "./drag-board.js";
-import { addInputModal, selectElement, saveInput } from "./element-manipulations.js";
+import { selectElement } from "./element-manipulations.js";
 import {CircuitComponent} from "./component.js"
 import {setProbe} from "./probe.js";
+import { addInputModal, saveInput } from "./modal.js";
 
 const board = document.querySelector(".board");
 const elements = document.querySelectorAll(".library__element_item img");

@@ -74,6 +74,8 @@ def generate_netlist(board_id):
               option += f"({component.options['amplitude']} {component.options['period']} {component.options['tmax']} {component.options['option']})"
           elif component.options['type'] == 'UNIT':
               option += f"({component.options['offset']} {component.options['amplitude']} {component.options['trise']})"
+          elif component.options['type'] == 'PWL':
+              option += f"({' '.join(component.options['tv'].values())})"
           net.append(option)
           netlist.append(net)
           continue

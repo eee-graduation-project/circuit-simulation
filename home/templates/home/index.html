@@ -62,12 +62,14 @@
       <svg class="graph"></svg>
     </div>
     <div class="modal">
-      <span class="button__modal_close">&times;</span>
+      {% comment %} <span class="button__modal_close">&times;</span> {% endcomment %}
       <h4 class="modal__element_name"></h4>
       <div class="modal__content_toggle" style="display:none">
-        <button type="button">AC</button>
-        <button type="button">SINE</button>
-        <button type="button">PULSE</button>
+        <button type="button" class="modal__button_ac">AC</button>
+        <button type="button" class="modal__button_sine">SINE</button>
+        <button type="button" class="modal__button_pulse">PULSE</button>
+        <button type="button" class="modal__button_unit">UNIT</button>
+        <button type="button" class="modal__button_pwl">PWL</button>
       </div>
       <form class="modal__content">
       </form>
@@ -192,6 +194,7 @@
   <script type="module" src="/static/js/api.js"></script>
   <script type="module" src="/static/js/probe.js"></script>
   <script type="module" src="/static/js/sidebar.js"></script>
+  <script type="module" src="/static/js/modal.js"></script>
   {% comment %} <script type="module" src="/static/js/simulation-result.js"></script> {% endcomment %}
 </body>
 </html>
