@@ -1,4 +1,5 @@
 import { circuitComponents } from "./component.js";
+import { selectElement } from "./element-manipulations.js";
 
 const board = document.querySelector('.board');
 let num = 0;
@@ -31,6 +32,7 @@ export class CircuitWire {
     const mouseVerticalLine = mouseHorizonLine.cloneNode(true);
     // mouseVerticalLine.addEventListener('click', selectElement);
     this.wires.append(mouseHorizonLine, mouseVerticalLine);
+    this.wires.addEventListener('click', selectElement);
     board.appendChild(this.wires);
   }
 
@@ -62,7 +64,13 @@ export class CircuitWire {
     endComponent.setConnection(this.endDir, `${startComponent.num}${this.startDir}`);
   }
   
-  deleteComponent() {
+  deleteWire() {
     this.wires.remove();
+    delete circuitWires[this.num];
+
+    const startComponent = circuitComponents[this.start];
+    const endComponent = circuitComponents[this.end];
+    startComponent.removeConnection(this.startDir, `${endComponent.num}${this.endDir}`);
+    endComponent.removeConnection(this.endDir, `${startComponent.num}${this.startDir}`);
   }
 }

@@ -41,13 +41,13 @@ export const generateDcResult = (probeVoltage, probeCurrent, data) => {
     drawGraph(key, iData, 'Value', 'Current');
   });
 
-  if (probeVoltage) {
+  if (probeVoltage.length) {
     const probeV = probeVoltage[0];
     const key = `(${probeV[0]},${probeV[1]})`;
     const graph = document.getElementById(`graph__figure_${key}`);
     graph.style.display = "flex";
   }
-  else if (probeCurrent) {
+  else if (probeCurrent.length) {
     const probeI = probeCurrent[0];
     const graph = document.getElementById(`graph__figure_${probeI}`);
     graph.style.display = "flex";
@@ -70,7 +70,7 @@ export const generateAcResult = (data) => {
   }));
   drawGraph('phase',pData, 'freq', 'phase');
   
-  if (data.magnitude) {
+  if (data.magnitude.length) {
     const key = `magnitude`;
     const graph = document.getElementById(`graph__figure_${key}`);
     graph.style.display = "flex";
@@ -103,13 +103,13 @@ export const generateTranResult = (probeVoltage, probeCurrent, data) => {
     drawGraph(key, iData, 'tValue', 'Current');
   });
 
-  if (probeVoltage) {
+  if (probeVoltage.length) {
     const probeV = probeVoltage[0];
     const key = `(${probeV[0]},${probeV[1]})`;
     const graph = document.getElementById(`graph__figure_${key}`);
     graph.style.display = "flex";
   }
-  else if (probeCurrent) {
+  else if (probeCurrent.length) {
     const probeI = probeCurrent[0];
     const graph = document.getElementById(`graph__figure_${probeI}`);
     graph.style.display = "flex";
@@ -145,6 +145,7 @@ const drawGraph = (key, data, xLabel, yLabel) => {
   plot.style.display = "none";
   plot.id = `graph__figure_${key}`;
   graph.appendChild(plot);
+  console.log(plot);
 }
 
 const selectGraph = () => {
