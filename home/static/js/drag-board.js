@@ -49,69 +49,10 @@ const boardDrag = (event) => {
   const x = event.clientX - offsetX;
   const y = event.clientY - offsetY;
   const position = getSVGCoordinates(x, y);
-  boardEvent.setAttribute('transform', `translate(${position.x}, ${position.y})`);
-  // const {height, width} = boardEvent.getBoundingClientRect();
-  const elementType = currComponent.type;
+  const transformInfo = boardEvent.getAttribute('transform').replace(/translate\([^\)]+\)\s*/g, `translate(${position.x}, ${position.y})`);
+  boardEvent.setAttribute('transform', transformInfo);
   
-  const lines = currComponent.svgElement.querySelectorAll('.board__element_wire');
-  const lineInfo = {}
-  Array.from(lines).forEach((line) => {
-    const direction = line.getAttribute('lineNum').slice(-1);
-    lineInfo[direction] = line.getBoundingClientRect();
-  })
-  const pointL = getSVGCoordinates(lineInfo.L?.left, lineInfo.L?.top);
-  const pointR = getSVGCoordinates(lineInfo.R?.left + lineInfo.R?.width, lineInfo.R?.top);
-  const pointT = getSVGCoordinates(lineInfo.T?.left, lineInfo.T?.top);
-  const pointB = getSVGCoordinates(lineInfo.B?.left, lineInfo.B?.bottom);
-  const pointI = getSVGCoordinates(lineInfo.I?.left, lineInfo.I?.top);
-  const pointM = getSVGCoordinates(lineInfo.M?.left + lineInfo.M?.width, lineInfo.M?.top);
-  
-  // element를 옮길 때 양옆에 연결된 wire를 찾아서 같이 이동시킴
-  wireS?.forEach((line) => {
-    const dir = line.startDir;
-    switch (dir) {
-      case 'L':
-        line.updateWire(pointL, null);
-        break;
-      case 'R':
-        line.updateWire(pointR, null);
-        break;
-      case 'T':
-        line.updateWire(pointT, null);
-        break;
-      case 'B':
-        line.updateWire(pointB, null);
-        break;
-      case 'I':
-        line.updateWire(pointI, null);
-        break;
-      case 'M':
-        line.updateWire(pointM, null);
-    }
-  })
-
-  wireE?.forEach((line) => {
-    const dir = line.endDir;
-    switch (dir) {
-      case 'L':
-        line.updateWire(null, pointL);
-        break;
-      case 'R':
-        line.updateWire(null, pointR);
-        break;
-      case 'T':
-        line.updateWire(null, pointT);
-        break;
-      case 'B':
-        line.updateWire(null, pointB);
-        break;
-      case 'I':
-        line.updateWire(null, pointI);
-        break;
-      case 'M':
-        line.updateWire(null, pointM);
-    }
-  })
+  currComponent.moveConnectedWires(wireS, wireE);
 }
 
 const boardDrop = () => {
@@ -123,7 +64,7 @@ export const startWire = (event) => {
   if (board.classList.contains('probe_voltage_plus') || board.classList.contains('probe_voltage_minus') || board.classList.contains('probe_current') || board.classList.contains('probe_vout_plus') || board.classList.contains('probe_vout_minus')) {
     return;
   }
-  // console.log(event.target);
+  
   const dataId = event.target.parentNode.getAttribute('data-id');
   const component = circuitComponents[dataId];
   const [direction, point] = getLinePosition(event.target);

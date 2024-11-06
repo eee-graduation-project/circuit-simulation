@@ -1,3 +1,5 @@
+import {getSVGCoordinates} from "./utils.js";
+import { circuitWires } from "./wire.js";
 import { selectSource } from "./sidebar.js";
 
 const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'E', 'voltage-source-current-controlled': 'G', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'F', 'current-source-current-controlled': 'H', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
@@ -23,6 +25,7 @@ export class CircuitComponent {
       this.svgElement = this.createSVGElement();
       circuitComponents[this.num] = this;
       this.addOption(); // sidebar option
+      this.rotation = 0;
   }
   
   addOption() {
@@ -53,7 +56,7 @@ export class CircuitComponent {
 
   createSVGElement() {
       const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      svgElement.setAttribute('transform', `translate(${this.position.x-15}, ${this.position.y})`);
+      svgElement.setAttribute('transform', `translate(${this.position.x-15}, ${this.position.y}) rotate(0)`);
       svgElement.setAttribute('draggable', `true`);
       svgElement.setAttribute('class', "board__element_item");
       svgElement.setAttribute('data-id', this.num);
@@ -270,18 +273,81 @@ export class CircuitComponent {
   }
 
   rotateComponent() {
-    const transformInfo = this.svgElement.getAttribute('transform');
+    this.rotation = (this.rotation + 90)%360;
     const bbox = this.svgElement.getBBox();
-    this.svgElement.setAttribute('transform', `${transformInfo} rotate(90, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
+    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)\s*/g, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
+    this.svgElement.setAttribute('transform', transformInfo);
     
     const texts = this.svgElement.querySelectorAll('text');
     texts.forEach((text) => {
-      const textTransformInfo = text.getAttribute('transform');
-      if (textTransformInfo)
-        text.setAttribute('transform', `${textTransformInfo} rotate(-90 ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`);
-      else
-        text.setAttribute('transform', `rotate(-90 ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`);
+      text.setAttribute('transform', `rotate(-${this.rotation} ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`);
     })
+
+    const wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == this.num);
+    const wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == this.num);
+
+    this.moveConnectedWires(wireS, wireE);
+  }
+
+  moveConnectedWires(wireS, wireE) {
+    const lineInfo = {}
+    this.wires.forEach((line) => {
+      const direction = line.getAttribute('lineNum').slice(-1);
+      lineInfo[direction] = line.getBoundingClientRect();
+    })
+    const pointL = getSVGCoordinates((this.rotation == 180) ? lineInfo.L?.right : lineInfo.L?.left, (this.rotation == 270) ? lineInfo.L?.bottom : lineInfo.L?.top);
+    const pointR = getSVGCoordinates((this.rotation == 180) ? lineInfo.R?.left : lineInfo.R?.right, (this.rotation == 90) ? lineInfo.R?.bottom : lineInfo.R?.top);
+    const pointT = getSVGCoordinates((this.rotation == 90) ? lineInfo.T?.right : lineInfo.T?.left, (this.rotation == 180) ? lineInfo.T?.bottom : lineInfo.T?.top);
+    const pointB = getSVGCoordinates((this.rotation == 270) ? lineInfo.B?.right : lineInfo.B?.left, (this.rotation == 180) ? lineInfo.B?.top : lineInfo.B?.bottom);
+    const pointI = getSVGCoordinates((this.rotation == 180) ? lineInfo.I?.right : lineInfo.I?.left, (this.rotation == 270) ? lineInfo.I?.bottom : lineInfo.I?.top);
+    const pointM = getSVGCoordinates((this.rotation == 180) ? lineInfo.M?.right : lineInfo.M?.left, (this.rotation == 270) ? lineInfo.M?.bottom : lineInfo.M?.top);
+    
+    // element를 옮길 때 양옆에 연결된 wire를 찾아서 같이 이동시킴
+    wireS?.forEach((line) => {
+      const dir = line.startDir;
+      switch (dir) {
+        case 'L':
+          line.updateWire(pointL, null);
+          break;
+        case 'R':
+          line.updateWire(pointR, null);
+          break;
+        case 'T':
+          line.updateWire(pointT, null);
+          break;
+        case 'B':
+          line.updateWire(pointB, null);
+          break;
+        case 'I':
+          line.updateWire(pointI, null);
+          break;
+        case 'M':
+          line.updateWire(pointM, null);
+      }
+    });
+  
+    wireE?.forEach((line) => {
+      const dir = line.endDir;
+      switch (dir) {
+        case 'L':
+          line.updateWire(null, pointL);
+          break;
+        case 'R':
+          line.updateWire(null, pointR);
+          break;
+        case 'T':
+          line.updateWire(null, pointT);
+          break;
+        case 'B':
+          line.updateWire(null, pointB);
+          break;
+        case 'I':
+          line.updateWire(null, pointI);
+          break;
+        case 'M':
+          line.updateWire(null, pointM);
+      }
+    });
   }
 
   diverseComponent() {

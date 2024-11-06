@@ -51,7 +51,7 @@ export const setProbe = (event, className, probeType) => {
 const deleteButton = document.querySelector('img[alt="trash"]');
 deleteButton.addEventListener("click", () => {
   const clickedElement = document.querySelector('.clicked_element');
-  if (clickedElement.tagName != 'img') {
+  if (clickedElement.tagName != 'image') {
     const dataId = clickedElement.getAttribute('data-id');
     const wire = circuitWires[dataId];
     wire.deleteWire();

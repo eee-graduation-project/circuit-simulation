@@ -14,13 +14,17 @@ export const selectElement = (event) => {
 
 //TODO 누적 회전
 export const rotateElement = () => {
-  const dataId = document.querySelector('.clicked_element').parentElement.getAttribute('data-id');
+  const element = document.querySelector('.clicked_element');
+  if (element.tagName != 'image') return;
+  const dataId = element.parentElement.getAttribute('data-id');
   const component = circuitComponents[dataId];
   component.rotateComponent();
 }
 
 export const diverseElement = () => {
-  const dataId = document.querySelector('.clicked_element').parentElement.getAttribute('data-id');
+  const element = document.querySelector('.clicked_element');
+  if (element.tagName != 'image') return;
+  const dataId = element.parentElement.getAttribute('data-id');
   const component = circuitComponents[dataId];
   component.diverseComponent();
 }
