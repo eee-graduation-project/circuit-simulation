@@ -35,7 +35,10 @@ export class CircuitComponent {
       const text = this.svgElement.querySelector('.component__text_value');
       text.textContent = `${this.value}${defaultValue[this.type]}`;
     }
-    else {
+    else if (/^[tv]\d+$/.test(name)) {
+      this.options.tv[name] = value;
+    }
+    else  {
       this.options[name] = value;
       const text = this.svgElement.querySelector(`.component__option_${name}`);
       text.textContent = `${name}: ${value}`;
@@ -125,10 +128,7 @@ export class CircuitComponent {
         return [null, name, []];
       case 'voltage-signal-source':
       case 'current-signal-source': {
-        this.options = {'type': 'AC', 'magnitude': 1}
-        const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
-        magnitude.setAttribute('text-anchor', 'start');
-        magnitude.setAttribute('class', 'component__option_magnitude');
+        const magnitude = this.setOptionsText('ac')[0];
         return [null, name, [magnitude]];
       }
       case 'voltage-source-current-controlled':
@@ -149,6 +149,78 @@ export class CircuitComponent {
     }
   }
   
+  setOptions(option) {
+    if (option == this.options.type.toLowerCase()) return;
+    const elements = document.querySelectorAll('[class^="component__option_"]');
+    elements.forEach((element) => {
+      element.remove();
+    })
+
+    const texts = this.setOptionsText(option);
+    this.svgElement.append(...texts);
+  }
+
+  setOptionsText(option) {
+    switch (option) {
+      case 'ac': {
+        this.options = {'type': 'AC', 'magnitude': 1};
+        const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
+        magnitude.setAttribute('text-anchor', 'start');
+        magnitude.setAttribute('class', 'component__option_magnitude');
+        return [magnitude];
+      }
+      case 'sine': {
+        this.options = {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
+        const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
+        offset.setAttribute('text-anchor', 'start');
+        offset.setAttribute('class', 'component__option_offset');
+        const amplitude = this.createTextElement({'x': 70, 'y': 12}, `amplitude: ${this.options.amplitude}`);
+        amplitude.setAttribute('text-anchor', 'start');
+        amplitude.setAttribute('class', 'component__option_amplitude');
+        const frequency = this.createTextElement({'x': 70, 'y': 32}, `frequency: ${this.options.frequency}`);
+        frequency.setAttribute('text-anchor', 'start');
+        frequency.setAttribute('class', 'component__option_frequency');
+        return [offset, amplitude, frequency];
+      }
+      case 'pulse': {
+        this.options = {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
+        const amplitude = this.createTextElement({'x': 70, 'y': 2}, `amplitude: ${this.options.amplitude}`);
+        amplitude.setAttribute('text-anchor', 'start');
+        amplitude.setAttribute('class', 'component__option_amplitude');
+        const period = this.createTextElement({'x': 70, 'y': 12}, `period: ${this.options.period}`);
+        period.setAttribute('text-anchor', 'start');
+        period.setAttribute('class', 'component__option_period');
+        const tmax = this.createTextElement({'x': 70, 'y': 32}, `tmax: ${this.options.tmax}`);
+        tmax.setAttribute('text-anchor', 'start');
+        tmax.setAttribute('class', 'component__option_tmax');
+        const option = this.createTextElement({'x': 70, 'y': 42}, `option: ${this.options.option}`);
+        option.setAttribute('text-anchor', 'start');
+        option.setAttribute('class', 'component__option_option');
+        return [amplitude, period, tmax, option];
+      }
+      case 'unit': {
+        this.options = {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
+        const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
+        offset.setAttribute('text-anchor', 'start');
+        offset.setAttribute('class', 'component__option_offset');
+        const amplitude = this.createTextElement({'x': 70, 'y': 12}, `amplitude: ${this.options.amplitude}`);
+        amplitude.setAttribute('text-anchor', 'start');
+        amplitude.setAttribute('class', 'component__option_amplitude');
+        const trise = this.createTextElement({'x': 70, 'y': 32}, `trise: ${this.options.trise}`);
+        trise.setAttribute('text-anchor', 'start');
+        trise.setAttribute('class', 'component__option_trise');
+        return [offset, amplitude, trise];
+      }
+      case 'pwl': {
+        this.options = {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
+        const tv = this.createTextElement({'x': 70, 'y': 2}, `(t,v)`);
+        tv.setAttribute('text-anchor', 'start');
+        tv.setAttribute('class', 'component__option_tv');
+        return [tv];
+      }
+    }
+  }
+  
   createTextElement(position, content) {
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', position.x);
@@ -160,6 +232,16 @@ export class CircuitComponent {
     text.setAttribute('fill', '#000000');
     text.textContent = content;
     return text;
+  }
+
+  addTnVOption(cnt) {
+    this.options.tv[`t${cnt}`] = 0;
+    this.options.tv[`v${cnt}`] = 1;
+  }
+
+  removeTnVOption(cnt) {
+    delete this.options.tv[`t${cnt}`];
+    delete this.options.tv[`v${cnt}`];
   }
 
   //TODO controlled source node 표시
