@@ -49,7 +49,6 @@ export class CircuitProbe {
     switch (type) {
       case 'board__element_wire':
         this.targetType = 'component';
-        // console.log(`lineNum: ${target.getAttribute('lineNum')}`);
         switch (target.getAttribute('lineNum').slice(-1)) {
           case 'L':
             this.targetNum = `${targetDataId}L`;

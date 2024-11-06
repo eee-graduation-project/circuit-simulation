@@ -68,7 +68,7 @@ def generate_netlist(board_id):
           option = ''
           if component.options['type'] == 'AC':
               option += f"{component.options['magnitude']}"
-          elif component.options['type'] == 'SIN':
+          elif component.options['type'] == 'SINE':
               option += f"({component.options['offset']} {component.options['amplitude']} {component.options['frequency']})"
           elif component.options['type'] == 'PULSE':
               option += f"({component.options['amplitude']} {component.options['period']} {component.options['tmax']} {component.options['option']})"

@@ -20,7 +20,6 @@ const addProbe = async () => {
   const probeCurrent = [] // 1차 배열
   const probeVout = {}
   probes.forEach((probe) => {
-    // console.log(probe);
     const probeInfo = {num: probe.num, targetNum: probe.targetNum, targetType: probe.targetType}
     switch(probe.type) {
       case 'voltagePlus':
@@ -66,7 +65,6 @@ const postSimulate = async () => {
       await Promise.all([postComponent(Object.values(circuitComponents)), postWire(Object.values(circuitWires))]);
     const analysis = await addAnalysis();
     const probes = await addProbe();
-    // console.log(analysis);
     await getSimulate(window.boardId, analysis, JSON.stringify(probes));
     temp = 1;
   } catch (error) {
