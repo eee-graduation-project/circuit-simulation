@@ -26,6 +26,7 @@ export class CircuitComponent {
       circuitComponents[this.num] = this;
       this.addOption(); // sidebar option
       this.rotation = 0;
+      this.diverse = 1;
   }
   
   addOption() {
@@ -56,7 +57,7 @@ export class CircuitComponent {
 
   createSVGElement() {
       const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      svgElement.setAttribute('transform', `translate(${this.position.x-15}, ${this.position.y}) rotate(0)`);
+      svgElement.setAttribute('transform', `translate(${this.position.x-15}, ${this.position.y}) rotate(0) translate(0) scale(1, 1) translate(0)`);
       svgElement.setAttribute('draggable', `true`);
       svgElement.setAttribute('class', "board__element_item");
       svgElement.setAttribute('data-id', this.num);
@@ -351,20 +352,22 @@ export class CircuitComponent {
   }
 
   diverseComponent() {
-    const transformInfo = this.svgElement.getAttribute('transform');
+    this.diverse = -this.diverse;
     const bbox = this.svgElement.getBBox();
     const cx = bbox.x+bbox.width/2;
     const cy = bbox.y+bbox.height/2;
-    this.svgElement.setAttribute('transform', `${transformInfo} translate(${cx}, ${cy}) scale(-1, 1) translate(${-cx}, ${-cy})`);
+    const transformInfo = this.svgElement.getAttribute('transform').replace(/translate\([^\)]*\)\s*scale\([^\)]*\)\s*translate\([^\)]*\)/, `translate(${cx}, ${cy}) scale(${this.diverse}, 1) translate(${-cx}, ${-cy})`);
+    this.svgElement.setAttribute('transform', transformInfo);
     
     const texts = this.svgElement.querySelectorAll('text');
     texts.forEach((text) => {
-      const textTransformInfo = text.getAttribute('transform');
-      if (textTransformInfo)
-        text.setAttribute('transform', `${textTransformInfo} translate(${cx}, ${cy}) scale(-1, 1) translate(${-cx}, ${-cy})`);
-      else
-        text.setAttribute('transform', `translate(${cx}, ${cy}) scale(-1, 1) translate(${-cx}, ${-cy})`);
+      text.setAttribute('transform', `translate(${cx}, ${cy}) scale(${this.diverse}, 1) translate(${-cx}, ${-cy})`);
     })
+
+    const wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == this.num);
+    const wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == this.num);
+
+    this.moveConnectedWires(wireS, wireE);
   }
 
   setConnection(pos, comp) {

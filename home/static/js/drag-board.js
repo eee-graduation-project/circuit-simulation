@@ -49,7 +49,7 @@ const boardDrag = (event) => {
   const x = event.clientX - offsetX;
   const y = event.clientY - offsetY;
   const position = getSVGCoordinates(x, y);
-  const transformInfo = boardEvent.getAttribute('transform').replace(/translate\([^\)]+\)\s*/g, `translate(${position.x}, ${position.y})`);
+  const transformInfo = boardEvent.getAttribute('transform').replace(/\btranslate\(([^,]+),\s*([^)]+)\)/, `translate(${position.x}, ${position.y})`);
   boardEvent.setAttribute('transform', transformInfo);
   
   currComponent.moveConnectedWires(wireS, wireE);
@@ -68,8 +68,7 @@ export const startWire = (event) => {
   const dataId = event.target.parentNode.getAttribute('data-id');
   const component = circuitComponents[dataId];
   const [direction, point] = getLinePosition(event.target);
-
-  const dataType = component.type;
+  
   if (!startPoint) {
     // if (event.target.hasAttribute('node'))
     mouseLines = new CircuitWire(event.target.getAttribute('wireNum'), dataId, direction);
