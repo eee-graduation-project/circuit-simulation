@@ -51,9 +51,16 @@ export const setProbe = (event, className, probeType) => {
 const deleteButton = document.querySelector('img[alt="trash"]');
 deleteButton.addEventListener("click", () => {
   const clickedElement = document.querySelector('.clicked_element');
-  const dataId = clickedElement.parentNode.getAttribute('data-id');
-  const component = (clickedElement.tagName == 'line') ? circuitWires[dataId] : circuitComponents[dataId];
-  component.deleteComponent();
+  if (clickedElement.tagName != 'img') {
+    const dataId = clickedElement.getAttribute('data-id');
+    const wire = circuitWires[dataId];
+    wire.deleteWire();
+  }
+  else {
+    const dataId = clickedElement.parentNode.getAttribute('data-id');
+    const component = circuitComponents[dataId];
+    component.deleteComponent();
+  }
 });
 
 const rotateButton = document.querySelector('img[alt="rotate"]');

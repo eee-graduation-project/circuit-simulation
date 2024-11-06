@@ -305,6 +305,10 @@ export class CircuitComponent {
     this.connections[`${this.num}${pos}`].push(comp);
   }
 
+  removeConnection(pos, comp) {
+    this.connections[`${this.num}${pos}`] = this.connections[`${this.num}${pos}`].filter(component => component != comp);
+  }
+
   getData(board) {
     return {num: this.num, name: this.name, type: this.type, value: this.value, options: this.options, connections: this.connections, board};
   }
