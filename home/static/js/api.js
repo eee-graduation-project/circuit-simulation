@@ -65,7 +65,25 @@ const postSimulate = async () => {
       await Promise.all([postComponent(Object.values(circuitComponents)), postWire(Object.values(circuitWires))]);
     const analysis = await addAnalysis();
     const probes = await addProbe();
-    await getSimulate(window.boardId, analysis, JSON.stringify(probes));
+    const data = await getSimulate(window.boardId, analysis, JSON.stringify(probes));
+
+    displayNode(data.com2node);
+
+    switch (data['analysis_type']) {
+      case '.op':
+        generateOpResult(data.result);
+        break;
+      case '.dc':
+        generateDcResult(probes, data.probeVoltage, data.probeCurrent, data.result);
+        break;
+      case '.ac':
+        generateAcResult(probes, data.result);
+        break;
+      case '.tran':
+        generateTranResult(probes, data.probeVoltage, data.probeCurrent, data.result);
+        break;
+    }
+
     temp = 1;
   } catch (error) {
     console.error('Error in postSimulate:', error);
@@ -117,21 +135,7 @@ const getSimulate = async (boardId, analysis, probes) => {
   const url = `/api/simulation?` + new URLSearchParams({boardId, analysis, probes}).toString();
   const data = await requestAPI('GET', url);
   console.log(data);
-  displayNode(data.com2node);
-  switch (data['analysis_type']) {
-    case '.op':
-      generateOpResult(data.result);
-      break;
-    case '.dc':
-      generateDcResult(data.probeVoltage, data.probeCurrent, data.result);
-      break;
-    case '.ac':
-      generateAcResult(data.result);
-      break;
-    case '.tran':
-      generateTranResult(data.probeVoltage, data.probeCurrent, data.result);
-      break;
-  }
+  return data;
 }
 
 const requestAPI = async (method, url, data) => {
