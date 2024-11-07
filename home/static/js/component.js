@@ -21,12 +21,15 @@ export class CircuitComponent {
       this.name = this.addName();
       this.position = position; // { x: 0, y: 0 }
       this.wires = [];
+      this.transparentWires = [];
       this.img;
-      this.svgElement = this.createSVGElement();
+      this.svgElement;
+      this.createSVGElement();
       circuitComponents[this.num] = this;
       this.addOption(); // sidebar option
       this.rotation = 0;
       this.diverse = 1;
+      this.makeLineThick();
   }
   
   addOption() {
@@ -57,6 +60,7 @@ export class CircuitComponent {
 
   createSVGElement() {
       const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      this.svgElement = svgElement;
       svgElement.setAttribute('transform', `translate(${this.position.x-15}, ${this.position.y}) rotate(0) translate(0) scale(1, 1) translate(0)`);
       svgElement.setAttribute('draggable', `true`);
       svgElement.setAttribute('class', "board__element_item");
@@ -69,8 +73,6 @@ export class CircuitComponent {
       svgElement.draggable = 'true';
       svgElement.append(this.img, value, name, ...options, ...this.wires);
       board.appendChild(svgElement);
-      
-      return svgElement;
   }
 
   appendWire() {
@@ -104,13 +106,21 @@ export class CircuitComponent {
     wire.setAttribute('stroke', 'red');
     wire.setAttribute('stroke-width', '2.5');
     wire.setAttribute('draggable', false);
-    wire.setAttribute('class', "board__element_wire");
     wire.setAttribute('x1', position.x1);
     wire.setAttribute('x2', position.x2);
     wire.setAttribute('y1', position.y1);
     wire.setAttribute('y2', position.y2);
-    wire.setAttribute('lineNum', `${this.name}${direction}`);
     this.connections[`${this.num}${direction}`] = [];
+
+    const transparentWire = wire.cloneNode(true);
+    transparentWire.setAttribute('stroke', 'transparent');
+    transparentWire.setAttribute('stroke-width', '15');
+    this.svgElement.appendChild(transparentWire);
+    this.transparentWires.push(transparentWire);
+    this.transparentWires.push(wire);
+    
+    wire.setAttribute('lineNum', `${this.name}${direction}`);
+    wire.setAttribute('class', "board__element_wire");
     return wire;
   }
 
@@ -261,6 +271,7 @@ export class CircuitComponent {
       text.setAttribute('fill', '#3498db');
       text.textContent = node;
       this.svgElement.appendChild(text);
+      this.makeLineThick();
     })
   }
   
@@ -380,5 +391,20 @@ export class CircuitComponent {
 
   getData(board) {
     return {num: this.num, name: this.name, type: this.type, value: this.value, options: this.options, connections: this.connections, board};
+  }
+  
+  makeLineThick() {
+    this.transparentWires.forEach((transparentWire) => {
+      transparentWire.addEventListener("mouseenter", () => {
+      this.wires.forEach((wire) => {
+        wire.setAttribute("stroke-width", "4");
+      })
+    })});
+    this.transparentWires.forEach((transparentWire) => {
+      transparentWire.addEventListener("mouseleave", () => {
+      this.wires.forEach((wire) => {
+        wire.setAttribute("stroke-width", "2.5");
+      })
+    })});
   }
 }
