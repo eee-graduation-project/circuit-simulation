@@ -6,8 +6,6 @@ import { generateAcResult, generateDcResult, generateOpResult, generateTranResul
 
 const runButton = document.querySelector('.button__simulate');
 
-let temp = 0;
-
 runButton.addEventListener('click', (event) => {
   event.preventDefault();
   postSimulate();
@@ -61,11 +59,11 @@ const addAnalysis = async () => {
 
 const postSimulate = async () => {
   try {
-    if (temp==0)
-      await Promise.all([postComponent(Object.values(circuitComponents)), postWire(Object.values(circuitWires))]);
+    await Promise.all([postComponent(Object.values(circuitComponents)), postWire(Object.values(circuitWires))]);
     const analysis = await addAnalysis();
     const probes = await addProbe();
     const data = await getSimulate(window.boardId, analysis, JSON.stringify(probes));
+    window.boardId = data.newBoardId;
 
     displayNode(data.com2node);
 
@@ -83,11 +81,8 @@ const postSimulate = async () => {
         generateTranResult(probes, data.probeVoltage, data.probeCurrent, data.result);
         break;
     }
-
-    temp = 1;
   } catch (error) {
     console.error('Error in postSimulate:', error);
-    temp = 1;
   }
 }
 

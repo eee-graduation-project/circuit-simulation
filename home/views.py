@@ -40,6 +40,8 @@ class CustomJSONEncoder(json.JSONEncoder): # by GPT
             return {'type': 'I'}  
         elif obj == pi:  # 파이 처리
             return {'type': 'Pi', 'value': float(pi)}  # Pi를 변환
+        elif isinstance(obj, uuid.UUID):
+            return str(obj)
         elif isinstance(obj, Basic):
             return str(obj)  # 필요에 따라 Basic을 문자열 또는 특정 형식으로 변환 가능
         # 필요한 경우 추가적인 타입을 여기에 추가할 수 있습니다.
@@ -145,6 +147,9 @@ def simulate_circuit(request):
       [analysis_type, result] = cmd_analysis(netlist, analysis, probeCurrent, probeVoltage, probeVout)
       response['analysis_type'] = analysis_type
       response['result'] = result
+      new_board = Board()
+      new_board.save()
+      response['newBoardId'] = new_board.id
     except Exception as e:
         response['simulation error'] = str(e)
         return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR, encoder=CustomJSONEncoder)
