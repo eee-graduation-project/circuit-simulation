@@ -17,56 +17,64 @@ export const generateOpResult = (result) => {
   });
 }
 
-export const generateDcResult = (probeVoltage, probeCurrent, data) => {
+export const generateDcResult = (probes, probeVoltage, probeCurrent, data) => {
   const graphContainer = document.querySelector('.graph__container');
   graphContainer.style.display = 'flex';
 
-  probeVoltage.forEach((probeV) => {
+  probeVoltage.forEach((probeV, idx) => {
+    const name = `probeV${probes.probeVoltagePlus[idx].num}`;
     const key = `(${probeV[0]},${probeV[1]})`;
     
-    const vData = data.Vvalue[key]?.map((y, idx) => ({
-      x: data.value[idx], y: y
+    const vData = data.value.map((x, idx) => ({
+      x: x,
+      y: data.Vvalue[key]?.[idx] ?? 0
     }));
 
-    drawGraph(key, vData, 'Value', 'Voltage');
+    drawGraph(`${name}_${key}`, vData, 'Value', 'Voltage');
   });
 
-  probeCurrent.forEach((probeI) => {
+  probeCurrent.forEach((probeI, idx) => {
+    const name = `probeI${probes.probeCurrent[idx].num}`;
     const key = probeI;
     
-    const iData = data.Ivalue[key]?.map((y, idx) => ({
-      x: data.value[idx], y: y
+    const iData = data.value.map((x, idx) => ({
+      x: x,
+      y: data.Ivalue[key]?.[idx] ?? 0
     }));
 
-    drawGraph(key, iData, 'Value', 'Current');
+    drawGraph(`${name}_${key}`, iData, 'Value', 'Current');
   });
 
   if (probeVoltage.length) {
     const probeV = probeVoltage[0];
+    const name = `probeV${probes.probeVoltagePlus[0].num}`;
     const key = `(${probeV[0]},${probeV[1]})`;
-    const graph = document.getElementById(`graph__figure_${key}`);
+    const graph = document.getElementById(`graph__figure_${name}_${key}`);
     graph.style.display = "flex";
   }
   else if (probeCurrent.length) {
     const probeI = probeCurrent[0];
-    const graph = document.getElementById(`graph__figure_${probeI}`);
+    const name = `probeI${probes.probeCurrent[0].num}`;
+    const graph = document.getElementById(`graph__figure_${name}_${probeI}`);
     graph.style.display = "flex";
   }
 
   selectGraph();
 }
 
-export const generateAcResult = (data) => {
+export const generateAcResult = (probes, data) => {
   const graphContainer = document.querySelector('.graph__container');
   graphContainer.style.display = 'flex';
 
-  const mData = data.magnitude.map((y, idx) => ({
-    x: data.freq[idx], y: y
+  const mData = data.freq.map((x, idx) => ({
+    x: x,
+    y: data.magnitude[key]?.[idx] ?? 0
   }));
   drawGraph('magnitude', mData, 'freq', 'magnitude');
 
-  const pData = data.phase.map((y, idx) => ({
-    x: data.freq[idx], y: y
+  const pData = data.freq.map((x, idx) => ({
+    x: x,
+    y: data.phase[key]?.[idx] ?? 0
   }));
   drawGraph('phase',pData, 'freq', 'phase');
   
@@ -79,39 +87,45 @@ export const generateAcResult = (data) => {
   selectGraph();
 }
 
-export const generateTranResult = (probeVoltage, probeCurrent, data) => {
+export const generateTranResult = (probes, probeVoltage, probeCurrent, data) => {
   const graphContainer = document.querySelector('.graph__container');
   graphContainer.style.display = 'flex';
 
-  probeVoltage.forEach((probeV) => {
+  probeVoltage.forEach((probeV, idx) => {
+    const name = `probeV${probes.probeVoltagePlus[idx].num}`;
     const key = `(${probeV[0]},${probeV[1]})`;
     
-    const vData = data.Vvalue[key]?.map((y, idx) => ({
-      x: data.tvalue[idx], y: y
+    const vData = data.tValue.map((x, idx) => ({
+      x: x,
+      y: data.Vvalue[key]?.[idx] ?? 0
     }));
 
-    drawGraph(key, vData, 'tValue', 'Voltage');
+    drawGraph(`${name}_${key}`, vData, 'tValue', 'Voltage');
   });
 
-  probeCurrent.forEach((probeI) => {
+  probeCurrent.forEach((probeI, idx) => {
+    const name = `probeI${probes.probeCurrent[idx].num}`;
     const key = probeI;
     
-    const iData = data.Ivalue[key]?.map((y, idx) => ({
-      x: data.tvalue[idx], y: y
+    const iData = data.tValue.map((x, idx) => ({
+      x: x,
+      y: data.Ivalue[key]?.[idx] ?? 0
     }));
 
-    drawGraph(key, iData, 'tValue', 'Current');
+    drawGraph(`${name}_${key}`, iData, 'tValue', 'Current');
   });
 
   if (probeVoltage.length) {
     const probeV = probeVoltage[0];
+    const name = `probeV${probes.probeVoltagePlus[0].num}`;
     const key = `(${probeV[0]},${probeV[1]})`;
-    const graph = document.getElementById(`graph__figure_${key}`);
+    const graph = document.getElementById(`graph__figure_${name}_${key}`);
     graph.style.display = "flex";
   }
   else if (probeCurrent.length) {
     const probeI = probeCurrent[0];
-    const graph = document.getElementById(`graph__figure_${probeI}`);
+    const name = `probeI${probes.probeCurrent[0].num}`;
+    const graph = document.getElementById(`graph__figure_${name}_${probeI}`);
     graph.style.display = "flex";
   }
 
