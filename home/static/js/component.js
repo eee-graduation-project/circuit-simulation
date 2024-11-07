@@ -154,6 +154,14 @@ export class CircuitComponent {
         sense.setAttribute('text-anchor', 'start');
         sense.setAttribute('class', 'component__option_sense');
         return [value, name, [sense]]
+      case 'voltage-source-voltage-controlled':
+      case 'current-source-voltage-controlled': {
+        name.setAttribute('y', 1);
+        const value = this.createTextElement({'x': 78, 'y': 1}, `1${defaultValue[this.type]}`);
+        value.setAttribute('class', 'component__text_value');
+        this.value = 1;
+        return [value, name, []];
+      }
       default: {
         const value = this.createTextElement({'x': 78, 'y': 12}, `1${defaultValue[this.type]}`);
         value.setAttribute('class', 'component__text_value');

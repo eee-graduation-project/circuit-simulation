@@ -6,13 +6,13 @@ export const generateOpResult = (result) => {
 
   Object.entries(result.voltage).forEach(([key, value]) => {
     const listItem = document.createElement('li');
-    listItem.textContent = `node${key}: ${value}V`;
+    listItem.textContent = `node${key}: ${JSON.stringify(value)}V`;
     voltageList.appendChild(listItem);
   });
 
   Object.entries(result.current).forEach(([key, value]) => {
     const listItem = document.createElement('li');
-    listItem.textContent = `${key}: ${value}A`;
+    listItem.textContent = `${key}: ${JSON.stringify(value)}A`;
     currentList.appendChild(listItem);
   });
 }
@@ -25,9 +25,8 @@ export const generateDcResult = (probes, probeVoltage, probeCurrent, data) => {
     const name = `probeV${probes.probeVoltagePlus[idx].num}`;
     const key = `(${probeV[0]},${probeV[1]})`;
     
-    const vData = data.value.map((x, idx) => ({
-      x: x,
-      y: data.Vvalue[key]?.[idx] ?? 0
+    const vData = data.Vvalue[key]?.map((y, idx) => ({
+      x: data.value[idx], y: y
     }));
 
     drawGraph(`${name}_${key}`, vData, 'Value', 'Voltage');
@@ -37,9 +36,8 @@ export const generateDcResult = (probes, probeVoltage, probeCurrent, data) => {
     const name = `probeI${probes.probeCurrent[idx].num}`;
     const key = probeI;
     
-    const iData = data.value.map((x, idx) => ({
-      x: x,
-      y: data.Ivalue[key]?.[idx] ?? 0
+    const iData = data.Ivalue[key]?.map((y, idx) => ({
+      x: data.value[idx], y: y
     }));
 
     drawGraph(`${name}_${key}`, iData, 'Value', 'Current');
@@ -66,15 +64,13 @@ export const generateAcResult = (probes, data) => {
   const graphContainer = document.querySelector('.graph__container');
   graphContainer.style.display = 'flex';
 
-  const mData = data.freq.map((x, idx) => ({
-    x: x,
-    y: data.magnitude[key]?.[idx] ?? 0
+  const mData = data.magnitude.map((y, idx) => ({
+    x: data.freq[idx], y: y
   }));
   drawGraph('magnitude', mData, 'freq', 'magnitude');
 
-  const pData = data.freq.map((x, idx) => ({
-    x: x,
-    y: data.phase[key]?.[idx] ?? 0
+  const pData = data.phase.map((y, idx) => ({
+    x: data.freq[idx], y: y
   }));
   drawGraph('phase',pData, 'freq', 'phase');
   
@@ -95,9 +91,8 @@ export const generateTranResult = (probes, probeVoltage, probeCurrent, data) => 
     const name = `probeV${probes.probeVoltagePlus[idx].num}`;
     const key = `(${probeV[0]},${probeV[1]})`;
     
-    const vData = data.tValue.map((x, idx) => ({
-      x: x,
-      y: data.Vvalue[key]?.[idx] ?? 0
+    const vData = data.Vvalue[key]?.map((y, idx) => ({
+      x: data.tvalue[idx], y: y
     }));
 
     drawGraph(`${name}_${key}`, vData, 'tValue', 'Voltage');
@@ -107,9 +102,8 @@ export const generateTranResult = (probes, probeVoltage, probeCurrent, data) => 
     const name = `probeI${probes.probeCurrent[idx].num}`;
     const key = probeI;
     
-    const iData = data.tValue.map((x, idx) => ({
-      x: x,
-      y: data.Ivalue[key]?.[idx] ?? 0
+    const iData = data.Ivalue[key]?.map((y, idx) => ({
+      x: data.tvalue[idx], y: y
     }));
 
     drawGraph(`${name}_${key}`, iData, 'tValue', 'Current');
