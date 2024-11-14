@@ -11,16 +11,6 @@ class WireSerializer(serializers.ModelSerializer):
         model = Wire
         fields = '__all__'
 
-class NodeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Node
-        fields = '__all__'
-
-class ConnectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Connection
-        fields = '__all__'
-
 class BoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
