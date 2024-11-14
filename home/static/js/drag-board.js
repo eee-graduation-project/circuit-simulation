@@ -52,6 +52,7 @@ const boardDrag = (event) => {
   boardEvent.setAttribute('transform', transformInfo);
   
   currComponent.moveConnectedWires(wireS, wireE);
+  currComponent.position = {'x': position.x, 'y': position.y};
 }
 
 const boardDrop = () => {
@@ -71,6 +72,7 @@ export const startWire = (event) => {
   if (!startPoint) {
     // if (event.target.hasAttribute('node'))
     mouseLines = new CircuitWire(dataId, direction);
+    mouseLines.makeAPI('POST');
     startPoint = point;
     mouseLines.updateWire(startPoint, startPoint);
     // event.target.setAttribute('wire', wireNum);

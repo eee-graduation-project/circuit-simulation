@@ -5,6 +5,7 @@ import {setProbe} from "./probe.js";
 import { boardDragStart, startWire } from "./drag-board.js";
 import { selectElement } from "./element-manipulations.js";
 import { addInputModal } from "./modal.js";
+import { apis } from "./api.js";
 
 const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'E', 'voltage-source-current-controlled': 'G', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'F', 'current-source-current-controlled': 'H', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
 const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'voltage-source-voltage-controlled': '', 'voltage-source-current-controlled': '', 'current-source': 'A', 'current-signal-source': '', 'current-source-voltage-controlled': '', 'current-source-current-controlled': '', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
@@ -38,6 +39,11 @@ export class CircuitComponent {
       this.makeLineThick();
   }
   
+  makeAPI(method) {
+    apis.push({method, 'target': this, 'type': 'component'});
+    console.log(apis);
+  }
+
   async setInitialCondition(value, options, rotation, diverse) {
     if (value) this.setValue('value', value);
     this.options = options;
@@ -69,7 +75,7 @@ export class CircuitComponent {
       const text = this.svgElement.querySelector(`.component__option_${name}`);
       text.textContent = `${name}: ${value}`;
     }
-    
+    this.makeAPI('PUT');
   }
   addName() {
     const name = `${firstName[this.type]}${elementCnt[this.type.split('-')[0]]++}`;
@@ -98,6 +104,9 @@ export class CircuitComponent {
     this.img.addEventListener("mousedown", boardDragStart);
     this.img.addEventListener("click", selectElement);
     this.img.addEventListener("dblclick", addInputModal);
+    this.img.addEventListener("mouseup", () => {
+      this.makeAPI('PUT');
+    })
   }
 
   handleLineClick() {
@@ -317,6 +326,7 @@ export class CircuitComponent {
   deleteComponent() {
     this.svgElement.remove();
     delete circuitComponents[this.num];
+    this.makeAPI('DELETE');
   }
   
   rotateComponent() {
@@ -334,6 +344,7 @@ export class CircuitComponent {
     const wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == this.num);
 
     this.moveConnectedWires(wireS, wireE);
+    this.makeAPI('PUT');
   }
 
   getLinePoint() {
@@ -420,14 +431,17 @@ export class CircuitComponent {
     const wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == this.num);
 
     this.moveConnectedWires(wireS, wireE);
+    this.makeAPI('PUT');
   }
 
   setConnection(pos, comp) {
     this.connections[`${this.num}${pos}`].push(comp);
+    this.makeAPI('PUT');
   }
 
   removeConnection(pos, comp) {
     this.connections[`${this.num}${pos}`] = this.connections[`${this.num}${pos}`].filter(component => component != comp);
+    this.makeAPI('PUT');
   }
 
   getData(board) {

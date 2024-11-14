@@ -1,3 +1,4 @@
+import { apis } from "./api.js";
 import { circuitComponents } from "./component.js";
 import { selectElement } from "./element-manipulations.js";
 import { setProbe } from "./probe.js";
@@ -18,6 +19,10 @@ export class CircuitWire {
       this.drawWire();
       this.num = num++;
       circuitWires[this.num]=this;
+  }
+
+  makeAPI(method) {
+    apis.push({method, 'target': this, 'type': 'wire'});
   }
 
   drawWire() {
@@ -82,5 +87,6 @@ export class CircuitWire {
     const endComponent = circuitComponents[this.end];
     startComponent.removeConnection(this.startDir, `${endComponent.num}${this.endDir}`);
     endComponent.removeConnection(this.endDir, `${startComponent.num}${this.startDir}`);
+    this.makeAPI('DELETE');
   }
 }

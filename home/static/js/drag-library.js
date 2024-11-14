@@ -44,6 +44,7 @@ const drop = (event) => {
   const elementType = elementEvent.target.alt;
   
   const component = new CircuitComponent(elementType, position);
+  component.makeAPI('POST');
   
   elementEvent = null;
 }
