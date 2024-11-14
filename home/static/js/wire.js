@@ -1,5 +1,7 @@
+import { apis } from "./api.js";
 import { circuitComponents } from "./component.js";
 import { selectElement } from "./element-manipulations.js";
+import { setProbe } from "./probe.js";
 
 const board = document.querySelector('.board');
 let num = 0;
@@ -7,17 +9,30 @@ let num = 0;
 export const circuitWires = {};
 
 export class CircuitWire {
-  constructor(startWireNum, start, startDir) {
+  constructor(start, startDir, n) {
       // this.position = position;
-      this.startWireNum = startWireNum;
       this.start = start; // component data-id
       this.startDir = startDir; // component의 방향 T L R
-      this.drawWire();
       this.end;
       this.endDir;
       this.wires;
-      this.num = num++;
+      this.drawWire();
+      this.setNum(Number(n));
       circuitWires[this.num]=this;
+  }
+  
+  setNum(n) {
+    if (n) {
+      this.num = n;
+      if (num <= n) num = n+1;
+    }
+    else {
+      this.num = num++;
+    }
+  }
+
+  makeAPI(method) {
+    apis.push({method, 'target': this, 'type': 'wire'});
   }
 
   drawWire() {
@@ -34,6 +49,16 @@ export class CircuitWire {
     this.wires.append(mouseHorizonLine, mouseVerticalLine);
     this.wires.addEventListener('click', selectElement);
     board.appendChild(this.wires);
+  }
+  
+  handleWireClick() {
+    this.wires.addEventListener("click", (event) => {
+      setProbe(event, 'probe_voltage_plus', 'voltagePlus');
+      setProbe(event, 'probe_voltage_minus', 'voltageMinus');
+      setProbe(event, 'probe_vout_plus', 'voutPlus');
+      setProbe(event, 'probe_vout_minus', 'voutMinus');
+      // setCurrentProbe(event)
+    });
   }
 
   updateWire = (startPoint, endPoint) => {
@@ -53,10 +78,10 @@ export class CircuitWire {
     }
   }
 
-  setEndWire(dataId, direction, wireNum) {
+  setEndWire(dataId, direction) {
     this.end = dataId;
     this.endDir = direction;
-    this.wireNum = wireNum;
+    // this.wireNum = wireNum;
 
     const startComponent = circuitComponents[this.start];
     const endComponent = circuitComponents[this.end];
@@ -70,7 +95,8 @@ export class CircuitWire {
 
     const startComponent = circuitComponents[this.start];
     const endComponent = circuitComponents[this.end];
-    startComponent.removeConnection(this.startDir, `${endComponent.num}${this.endDir}`);
-    endComponent.removeConnection(this.endDir, `${startComponent.num}${this.startDir}`);
+    startComponent?.removeConnection(this.startDir, `${this.end}${this.endDir}`);
+    endComponent?.removeConnection(this.endDir, `${this.start}${this.startDir}`);
+    this.makeAPI('DELETE');
   }
 }

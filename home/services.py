@@ -10,7 +10,7 @@ def dfs_node(id2comp, com2node, comps, nodeNum):
     for comp in comps:
         id = comp[:-1]
         pos = comp[-1]
-        if (comp in com2node): return
+        if (comp in com2node): continue
         com2node[comp] = nodeNum
         connection = id2comp[id]['connections'][f'{id}{pos}']
         dfs_node(id2comp, com2node, connection, nodeNum)
@@ -63,7 +63,6 @@ def generate_netlist(board_id):
       if component.type in ('voltage-source', 'current-source'):
           net.append('DC')
       elif component.type in ('voltage-signal-source', 'current-signal-source'):
-          print(component.options)
           net.append(component.options['type'])
           option = ''
           if component.options['type'] == 'AC':

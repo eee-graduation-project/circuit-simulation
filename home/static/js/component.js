@@ -1,6 +1,11 @@
 import {getSVGCoordinates} from "./utils.js";
 import { circuitWires } from "./wire.js";
 import { selectSource } from "./sidebar.js";
+import {setProbe} from "./probe.js";
+import { boardDragStart, startWire } from "./drag-board.js";
+import { selectElement } from "./element-manipulations.js";
+import { addInputModal } from "./modal.js";
+import { apis } from "./api.js";
 
 const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'E', 'voltage-source-current-controlled': 'G', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'F', 'current-source-current-controlled': 'H', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
 const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'voltage-source-voltage-controlled': '', 'voltage-source-current-controlled': '', 'current-source': 'A', 'current-signal-source': '', 'current-source-voltage-controlled': '', 'current-source-current-controlled': '', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
@@ -12,19 +17,21 @@ const board = document.querySelector('.board');
 export const circuitComponents = {};
 
 export class CircuitComponent {
-  constructor(type, position) {
-      this.num = idNum++;
+  constructor(type, position, num) {
+      this.setNum(Number(num));
       this.type = type;
       this.value;
       this.options = {};
       this.connections = {};
       this.name = this.addName();
-      this.position = position; // { x: 0, y: 0 }
+      this.position = {'x': position.x, 'y': position.y}; // { x: 0, y: 0 }
       this.wires = [];
       this.transparentWires = [];
       this.img;
       this.svgElement;
       this.createSVGElement();
+      this.handleLineClick();
+      this.handleImgEvent();
       circuitComponents[this.num] = this;
       this.addOption(); // sidebar option
       this.rotation = 0;
@@ -32,6 +39,34 @@ export class CircuitComponent {
       this.makeLineThick();
   }
   
+  setNum(num) {
+    if (num) {
+      this.num = num;
+      if (idNum < num) idNum = num+1;
+    }
+    else {
+      this.num = idNum++;
+    }
+  }
+  
+  makeAPI(method) {
+    apis.push({method, 'target': this, 'type': 'component'});
+    console.log(apis);
+  }
+
+  async setInitialCondition(value, options, rotation, diverse) {
+    if (value) this.setValue('value', value);
+    this.options = options;
+    if (options.length) this.setOptions(options.type.toLowerCase());
+    
+    await new Promise(resolve => setTimeout(resolve, 200));
+    this.rotation = (rotation - 90)%360;
+    this.rotateComponent();
+    await new Promise(resolve => setTimeout(resolve, 200));
+    this.diverse = -diverse;
+    this.diverseComponent();
+  }
+
   addOption() {
     selectSource(this.name);
   }
@@ -50,7 +85,7 @@ export class CircuitComponent {
       const text = this.svgElement.querySelector(`.component__option_${name}`);
       text.textContent = `${name}: ${value}`;
     }
-    
+    this.makeAPI('PUT');
   }
   addName() {
     const name = `${firstName[this.type]}${elementCnt[this.type.split('-')[0]]++}`;
@@ -75,6 +110,25 @@ export class CircuitComponent {
       board.appendChild(svgElement);
   }
 
+  handleImgEvent() {
+    this.img.addEventListener("mousedown", boardDragStart);
+    this.img.addEventListener("click", selectElement);
+    this.img.addEventListener("dblclick", addInputModal);
+    this.img.addEventListener("mouseup", () => {
+      this.makeAPI('PUT');
+    })
+  }
+
+  handleLineClick() {
+    this.wires.forEach((wire) => {
+      wire.addEventListener('mousedown', startWire);
+      wire.addEventListener("click", (event)=>{setProbe(event, 'probe_voltage_plus', 'voltagePlus');});
+      wire.addEventListener("click", (event)=>{setProbe(event, 'probe_voltage_minus', 'voltageMinus');});
+      wire.addEventListener("click", (event)=>{setProbe(event, 'probe_current', 'current');});
+      wire.addEventListener("click", (event)=>{setProbe(event, 'probe_vout_minus', 'voutMinus');});
+      wire.addEventListener("click", (event)=>{setProbe(event, 'probe_vout_plus', 'voutPlus');});
+      });
+  }
   appendWire() {
     switch (this.type) {
       case 'ground':
@@ -119,7 +173,7 @@ export class CircuitComponent {
     this.transparentWires.push(transparentWire);
     this.transparentWires.push(wire);
     
-    wire.setAttribute('lineNum', `${this.name}${direction}`);
+    wire.setAttribute('lineNum', `${this.num}${direction}`);
     wire.setAttribute('class', "board__element_wire");
     return wire;
   }
@@ -185,14 +239,14 @@ export class CircuitComponent {
   setOptionsText(option) {
     switch (option) {
       case 'ac': {
-        this.options = {'type': 'AC', 'magnitude': 1};
+        this.options ??= {'type': 'AC', 'magnitude': 1};
         const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
         magnitude.setAttribute('text-anchor', 'start');
         magnitude.setAttribute('class', 'component__option_magnitude');
         return [magnitude];
       }
       case 'sine': {
-        this.options = {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
+        this.options ??= {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
         const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
         offset.setAttribute('text-anchor', 'start');
         offset.setAttribute('class', 'component__option_offset');
@@ -205,7 +259,7 @@ export class CircuitComponent {
         return [offset, amplitude, frequency];
       }
       case 'pulse': {
-        this.options = {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
+        this.options ??= {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
         const amplitude = this.createTextElement({'x': 70, 'y': 2}, `amplitude: ${this.options.amplitude}`);
         amplitude.setAttribute('text-anchor', 'start');
         amplitude.setAttribute('class', 'component__option_amplitude');
@@ -221,7 +275,7 @@ export class CircuitComponent {
         return [amplitude, period, tmax, option];
       }
       case 'unit': {
-        this.options = {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
+        this.options ??= {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
         const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
         offset.setAttribute('text-anchor', 'start');
         offset.setAttribute('class', 'component__option_offset');
@@ -234,7 +288,7 @@ export class CircuitComponent {
         return [offset, amplitude, trise];
       }
       case 'pwl': {
-        this.options = {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
+        this.options ??= {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
         const tv = this.createTextElement({'x': 70, 'y': 2}, `(t,v)`);
         tv.setAttribute('text-anchor', 'start');
         tv.setAttribute('class', 'component__option_tv');
@@ -290,12 +344,13 @@ export class CircuitComponent {
   deleteComponent() {
     this.svgElement.remove();
     delete circuitComponents[this.num];
+    this.makeAPI('DELETE');
   }
-
+  
   rotateComponent() {
     this.rotation = (this.rotation + 90)%360;
     const bbox = this.svgElement.getBBox();
-    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)\s*/g, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
+    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)/g, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
     this.svgElement.setAttribute('transform', transformInfo);
     
     const texts = this.svgElement.querySelectorAll('text');
@@ -307,9 +362,10 @@ export class CircuitComponent {
     const wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == this.num);
 
     this.moveConnectedWires(wireS, wireE);
+    this.makeAPI('PUT');
   }
 
-  moveConnectedWires(wireS, wireE) {
+  getLinePoint() {
     const lineInfo = {}
     this.wires.forEach((line) => {
       const direction = line.getAttribute('lineNum').slice(-1);
@@ -321,6 +377,12 @@ export class CircuitComponent {
     const pointB = getSVGCoordinates((this.rotation == 270) ? lineInfo.B?.right : lineInfo.B?.left, (this.rotation == 180) ? lineInfo.B?.top : lineInfo.B?.bottom);
     const pointI = getSVGCoordinates((this.rotation == 180) ? lineInfo.I?.right : lineInfo.I?.left, (this.rotation == 270) ? lineInfo.I?.bottom : lineInfo.I?.top);
     const pointM = getSVGCoordinates((this.rotation == 180) ? lineInfo.M?.right : lineInfo.M?.left, (this.rotation == 270) ? lineInfo.M?.bottom : lineInfo.M?.top);
+
+    return {pointL, pointR, pointT, pointB, pointI, pointM};
+  }
+
+  moveConnectedWires(wireS, wireE) {
+    const {pointL, pointR, pointT, pointB, pointI, pointM} = this.getLinePoint();
     
     // element를 옮길 때 양옆에 연결된 wire를 찾아서 같이 이동시킴
     wireS?.forEach((line) => {
@@ -387,18 +449,21 @@ export class CircuitComponent {
     const wireE = Object.values(circuitWires).filter(circuitWire => circuitWire.end == this.num);
 
     this.moveConnectedWires(wireS, wireE);
+    this.makeAPI('PUT');
   }
 
   setConnection(pos, comp) {
     this.connections[`${this.num}${pos}`].push(comp);
+    this.makeAPI('PUT');
   }
 
   removeConnection(pos, comp) {
     this.connections[`${this.num}${pos}`] = this.connections[`${this.num}${pos}`].filter(component => component != comp);
+    this.makeAPI('PUT');
   }
 
   getData(board) {
-    return {num: this.num, name: this.name, type: this.type, value: this.value, options: this.options, connections: this.connections, board};
+    return {'num': this.num, 'type': this.type, 'value': this.value, 'options': this.options, 'connections': this.connections, 'name': this.name, 'position': this.position, 'rotation': this.rotation, 'diverse': this.diverse, board};
   }
   
   makeLineThick() {

@@ -1,7 +1,6 @@
 import {getSVGCoordinates} from "./utils.js";
 import { circuitComponents } from "./component.js";
 import { CircuitWire, circuitWires } from "./wire.js";
-import {setProbe} from "./probe.js";
 
 let mouseLines = null;
 let startPoint = null;
@@ -53,6 +52,7 @@ const boardDrag = (event) => {
   boardEvent.setAttribute('transform', transformInfo);
   
   currComponent.moveConnectedWires(wireS, wireE);
+  currComponent.position = {'x': position.x, 'y': position.y};
 }
 
 const boardDrop = () => {
@@ -67,17 +67,18 @@ export const startWire = (event) => {
   
   const dataId = event.target.parentNode.getAttribute('data-id');
   const component = circuitComponents[dataId];
-  const [direction, point] = getLinePosition(event.target);
+  const [direction, point] = getLinePosition(event.target, component);
   
   if (!startPoint) {
     // if (event.target.hasAttribute('node'))
-    mouseLines = new CircuitWire(event.target.getAttribute('wireNum'), dataId, direction);
+    mouseLines = new CircuitWire(dataId, direction);
+    mouseLines.makeAPI('POST');
     startPoint = point;
     mouseLines.updateWire(startPoint, startPoint);
-    event.target.setAttribute('wire', wireNum);
+    // event.target.setAttribute('wire', wireNum);
   }
   else {
-    mouseLines.setEndWire(dataId, direction, wireNum);
+    mouseLines.setEndWire(dataId, direction);
     mouseLines.updateWire(startPoint, point);
     startPoint = null;
     
@@ -85,40 +86,29 @@ export const startWire = (event) => {
     
     // endWireNum = null;
 
-    event.target.setAttribute('wire', wireNum);
-    wireNum += 1;
-
-    mouseLines.wires.addEventListener("click", (event) => {
-      setProbe(event, 'probe_voltage_plus', 'voltagePlus');
-      setProbe(event, 'probe_voltage_minus', 'voltageMinus');
-      setProbe(event, 'probe_vout_plus', 'voutPlus');
-      setProbe(event, 'probe_vout_minus', 'voutMinus');
-      // setCurrentProbe(event)
-    });
+    // event.target.setAttribute('wire', wireNum);
+    // wireNum += 1;
   }
 };
 
-const getLinePosition = (line) => {
-  const {top, bottom, left, width, height} = line.getBoundingClientRect();
+export const getLinePosition = (line, component) => {
+  const {pointL, pointR, pointT, pointB, pointI, pointM} = component.getLinePoint();
   let point;
   const direction = line.getAttribute('lineNum').slice(-1);
   switch (direction) {
     case 'L':
+      return ['L', pointL];
     case 'I':
+      return ['I', pointI];
     case 'M':
-      point = getSVGCoordinates(left, top+height/2);
-      break;
+      return ['M', pointM];
     case 'R':
-      point = getSVGCoordinates(left + width, top+height/2);
-      break;
+      return ['R', pointR];
     case 'T':
-      point = getSVGCoordinates(left+width/2, top+1.5);
-      break;
+      return ['T', pointT];
     case 'B':
-      point = getSVGCoordinates(left+width/2, bottom);
-      break;
+      return ['B', pointB];
   }
-  return [direction, point]
 }
 
 const drawWire = (event) => {

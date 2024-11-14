@@ -1,10 +1,11 @@
 import {getCookie} from "./utils.js";
 import { circuitComponents } from "./component.js";
-import { circuitWires } from "./wire.js";
 import { circuitProbes } from "./probes.js";
 import { generateAcResult, generateDcResult, generateOpResult, generateTranResult } from "./draw-graph.js";
 
 const runButton = document.querySelector('.button__simulate');
+
+export let apis = []; // {method, target, type}
 
 runButton.addEventListener('click', (event) => {
   event.preventDefault();
@@ -42,7 +43,7 @@ const addAnalysis = async () => {
   const modeFieldSets = document.querySelectorAll('fieldset');
   const fieldsetElement = {};
   modeFieldSets.forEach((fieldset) => {
-    if (!fieldset.disabled) Array.from(fieldset.elements).forEach(input => {fieldsetElement[input.name] = input.value;})
+    if (!fieldset.disabled) Array.from(fieldset.elements).forEach(input => {fieldsetElement[input.name] = input.value;});
   });
 
   switch(fieldsetElement.mode) {
@@ -59,7 +60,8 @@ const addAnalysis = async () => {
 
 const postSimulate = async () => {
   try {
-    await Promise.all([postComponent(Object.values(circuitComponents)), postWire(Object.values(circuitWires))]);
+    await sendDataApi();
+    apis = [];
     const analysis = await addAnalysis();
     const probes = await addProbe();
     const data = await getSimulate(window.boardId, analysis, JSON.stringify(probes));
@@ -86,18 +88,47 @@ const postSimulate = async () => {
   }
 }
 
-const postComponent = async (components) => {
-  const data = components.map((component) => {
-    return component.getData(window.boardId);
-  });
-  await requestAPI('POST', '/api/component/', data);
+const sendDataApi = async () => {
+  for (const api of apis) {
+    switch (api.type) {
+      case 'component':
+        await sendComponent(api.target, api.method);
+        break;
+      case 'wire':
+        await sendWire(api.target, api.method);
+        break;
+    }
+  }
 }
 
-const postWire = async (wires) => {
-  const data = wires.map((wire) => {
-    return {num: wire.num, start: wire.start, startDir: wire.startDir, end: wire.end, endDir: wire.endDir, board: window.boardId}
-  });
-  await requestAPI('POST', '/api/wire/', data);
+const sendComponent = async (component, method) => {
+  const data = component.getData(window.boardId);
+  switch (method) {
+    case 'POST':
+      await requestAPI('POST', '/api/component/', data);
+      break;
+    case 'PUT':
+      await requestAPI('PUT', `/api/component/${data.num}/?`+ new URLSearchParams({boardId}).toString(), data);
+      break;
+    case 'DELETE':
+      await requestAPI('DELETE', `/api/component/${component.num}/?`+ new URLSearchParams({boardId}).toString());
+      break;
+  }
+}
+
+const sendWire = async (wire, method) => {
+  const data = {...JSON.parse(JSON.stringify(wire)), board: window.boardId}
+  switch (method) {
+    case 'POST':
+      await requestAPI('POST', '/api/wire/', data);
+      break;
+    case 'PUT':
+      await requestAPI('PUT', `/api/wire/${data.num}/?`+ new URLSearchParams({boardId}).toString(), data);
+      break;
+    case 'DELETE':
+      await requestAPI('DELETE', `/api/wire/${wire.num}/?`+ new URLSearchParams({boardId}).toString());
+      break;
+  }
 }
 
 const displayNode = (com2node) => {
@@ -133,7 +164,7 @@ const getSimulate = async (boardId, analysis, probes) => {
   return data;
 }
 
-const requestAPI = async (method, url, data) => {
+export const requestAPI = async (method, url, data) => {
   const request = {
     method,
     headers: {
@@ -150,5 +181,10 @@ const requestAPI = async (method, url, data) => {
 const closeButton = document.querySelector(".graph__button_close");
 closeButton.addEventListener("click", () => {
   const graph = document.querySelector(".graph__container");
+  graph.querySelector("#probe").innerHTML = '';
+  const svgElement = graph.querySelector(".graph");
+  while (svgElement.firstChild) {
+    svgElement.removeChild(svgElement.firstChild);
+  }
   graph.style.display = "none";
 });
