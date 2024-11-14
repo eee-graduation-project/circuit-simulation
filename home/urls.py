@@ -12,6 +12,7 @@ router.register(r'board', views.BoardViewSet)
 urlpatterns = [
     # path('test/', views.test_example),
     path('home/', views.show_home, name='show_home'),
+    path('boards/<uuid:id>/', views.show_board, name='boards'),
     path('api/simulation', views.simulate_circuit, name='simulate_circuit'),
     path('api/', include(router.urls)),
 ]

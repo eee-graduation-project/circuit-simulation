@@ -1,5 +1,5 @@
+from django.shortcuts import redirect
 from django.shortcuts import render
-from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -10,6 +10,7 @@ import json
 from .simulation.simulation import cmd_analysis
 from .services import generate_netlist, generate_probe
 import numpy as np
+import traceback
 
 from django.http import JsonResponse
 
@@ -49,12 +50,22 @@ class CustomJSONEncoder(json.JSONEncoder): # by GPT
 def show_home(request):
   new_board = Board()
   new_board.save()
-  return render(request, 'home/index.html', {'board_id': new_board.id})
+  return redirect("boards", id=new_board.id)
+
+def show_board(request, id):
+  return render(request, 'home/index.html', {'board_id': id})
 
 class ComponentViewSet(viewsets.ModelViewSet):
     queryset = Component.objects.all()
     serializer_class = ComponentSerializer
 
+    def list(self, request):
+      board_id = uuid.UUID(request.query_params.get('boardId', None))
+      components = Component.objects.filter(board__id=board_id)
+      
+      serializer = ComponentSerializer(components, many=True)
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    
     def create(self, request, *args, **kwargs):
         data = request.data
         if isinstance(data, list):
@@ -71,6 +82,13 @@ class WireViewSet(viewsets.ModelViewSet):
     queryset = Wire.objects.all()
     serializer_class = WireSerializer
 
+    def list(self, request):
+      board_id = uuid.UUID(request.query_params.get('boardId', None))
+      wires = Wire.objects.filter(board__id=board_id)
+      
+      serializer = WireSerializer(wires, many=True)
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    
     def create(self, request, *args, **kwargs):
         data = request.data
         if isinstance(data, list):
@@ -140,13 +158,22 @@ def simulate_circuit(request):
     print(f"probeV : {probeVoltage}")
     print(f"probeI : {probeCurrent}")
     print(f"probeVout : {probeVout}")
-    response = {'com2node': com2node, 'netlist': netlist, 'analysis': analysis, 'probeVoltage': probeVoltage, 'probeCurrent': probeCurrent, 'probeVout': probeVout}
+    
+    new_board = Board()
+    new_board.save()
+    response = {'com2node': com2node, 'netlist': netlist, 'analysis': analysis, 'probeVoltage': probeVoltage, 'probeCurrent': probeCurrent, 'probeVout': probeVout, 'newBoardId': new_board.id}
     try:
       [analysis_type, result] = cmd_analysis(netlist, analysis, probeCurrent, probeVoltage, probeVout)
       response['analysis_type'] = analysis_type
       response['result'] = result
     except Exception as e:
-        response['simulation error'] = str(e)
-        return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR, encoder=CustomJSONEncoder)
+      error_message = str(e)
+      error_details = traceback.format_exc()
+      
+      response['simulation_error'] = {
+          'message': error_message,
+          'details': error_details
+      }
+      return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR, encoder=CustomJSONEncoder)
     print(result)
     return JsonResponse(response, encoder=CustomJSONEncoder)
