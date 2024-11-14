@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Component, Node, Connection, Board, Wire
+from .models import Component, Board, Wire
 
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:

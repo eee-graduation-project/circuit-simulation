@@ -3,8 +3,8 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .models import Component, Node, Connection, Board, Wire
-from .serializers import ComponentSerializer, NodeSerializer, ConnectionSerializer, BoardSerializer, WireSerializer
+from .models import Component, Board, Wire
+from .serializers import ComponentSerializer, BoardSerializer, WireSerializer
 import uuid
 import json
 from .simulation.simulation import cmd_analysis
@@ -41,6 +41,8 @@ class CustomJSONEncoder(json.JSONEncoder): # by GPT
             return {'type': 'I'}  
         elif obj == pi:  # 파이 처리
             return {'type': 'Pi', 'value': float(pi)}  # Pi를 변환
+        elif isinstance(obj, uuid.UUID):
+            return str(obj)
         elif isinstance(obj, Basic):
             return str(obj)  # 필요에 따라 Basic을 문자열 또는 특정 형식으로 변환 가능
         # 필요한 경우 추가적인 타입을 여기에 추가할 수 있습니다.
@@ -77,6 +79,31 @@ class ComponentViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        num = kwargs.get('num')
+        board_id = uuid.UUID(request.query_params.get('boardId', None))
+        try:
+            component = Component.objects.get(board__id=board_id, num=num)
+        except Component.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = ComponentSerializer(component, data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, *args, **kwargs):
+        num = kwargs.get('num')
+        board_id = uuid.UUID(request.query_params.get('boardId', None))
+        try:
+            component = Component.objects.get(board__id=board_id, num=num)
+        except Component.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        component.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class WireViewSet(viewsets.ModelViewSet):
     queryset = Wire.objects.all()
@@ -101,37 +128,16 @@ class WireViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-class NodeViewSet(viewsets.ModelViewSet):
-    queryset = Node.objects.all()
-    serializer_class = NodeSerializer
-
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        if isinstance(data, list):
-            serializer = self.get_serializer(data=data, many=True)
-        else:
-            serializer = self.get_serializer(data=data)
-
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-class ConnectionViewSet(viewsets.ModelViewSet):
-    queryset = Connection.objects.all()
-    serializer_class = ConnectionSerializer
-
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        if isinstance(data, list):
-            serializer = self.get_serializer(data=data, many=True)
-        else:
-            serializer = self.get_serializer(data=data)
-
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def delete(self, request, *args, **kwargs):
+        num = kwargs.get('num')
+        board_id = uuid.UUID(request.query_params.get('boardId', None))
+        try:
+            wire = Wire.objects.get(board__id=board_id, num=num)
+        except Wire.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        wire.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
