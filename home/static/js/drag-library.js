@@ -44,18 +44,6 @@ const drop = (event) => {
   const elementType = elementEvent.target.alt;
   
   const component = new CircuitComponent(elementType, position);
-  component.wires.forEach((wire) => {
-    wire.addEventListener('mousedown', startWire);
-    wire.addEventListener("click", (event)=>{setProbe(event, 'probe_voltage_plus', 'voltagePlus');});
-    wire.addEventListener("click", (event)=>{setProbe(event, 'probe_voltage_minus', 'voltageMinus');});
-    wire.addEventListener("click", (event)=>{setProbe(event, 'probe_current', 'current');});
-    wire.addEventListener("click", (event)=>{setProbe(event, 'probe_vout_minus', 'voutMinus');});
-    wire.addEventListener("click", (event)=>{setProbe(event, 'probe_vout_plus', 'voutPlus');});
-    });
-  
-  component.img.addEventListener("mousedown", boardDragStart);
-  component.img.addEventListener("click", selectElement);
-  component.img.addEventListener("dblclick", addInputModal);
   
   elementEvent = null;
 }

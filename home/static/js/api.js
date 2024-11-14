@@ -44,7 +44,7 @@ const addAnalysis = async () => {
   const modeFieldSets = document.querySelectorAll('fieldset');
   const fieldsetElement = {};
   modeFieldSets.forEach((fieldset) => {
-    if (!fieldset.disabled) Array.from(fieldset.elements).forEach(input => {fieldsetElement[input.name] = input.value;})
+    if (!fieldset.disabled) Array.from(fieldset.elements).forEach(input => {fieldsetElement[input.name] = input.value;});
   });
 
   switch(fieldsetElement.mode) {
@@ -95,13 +95,15 @@ const postComponent = async (components) => {
   const data = components.map((component) => {
     return component.getData(window.boardId);
   });
+  console.log(data);
   await requestAPI('POST', '/api/component/', data);
 }
 
 const postWire = async (wires) => {
   const data = wires.map((wire) => {
-    return {num: wire.num, start: wire.start, startDir: wire.startDir, end: wire.end, endDir: wire.endDir, board: window.boardId}
+    return {...JSON.parse(JSON.stringify(wire)), board: window.boardId};
   });
+  console.log(data);
   await requestAPI('POST', '/api/wire/', data);
 }
 
@@ -138,7 +140,7 @@ const getSimulate = async (boardId, analysis, probes) => {
   return data;
 }
 
-const requestAPI = async (method, url, data) => {
+export const requestAPI = async (method, url, data) => {
   const request = {
     method,
     headers: {
@@ -155,5 +157,10 @@ const requestAPI = async (method, url, data) => {
 const closeButton = document.querySelector(".graph__button_close");
 closeButton.addEventListener("click", () => {
   const graph = document.querySelector(".graph__container");
+  graph.querySelector("#probe").innerHTML = '';
+  const svgElement = graph.querySelector(".graph");
+  while (svgElement.firstChild) {
+    svgElement.removeChild(svgElement.firstChild);
+  }
   graph.style.display = "none";
 });
