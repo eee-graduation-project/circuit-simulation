@@ -103,7 +103,7 @@ class ComponentViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
         
         component.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({}, status=status.HTTP_200_OK)
 
 class WireViewSet(viewsets.ModelViewSet):
     queryset = Wire.objects.all()
@@ -137,7 +137,7 @@ class WireViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
         
         wire.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({}, status=status.HTTP_200_OK)
 
 class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()

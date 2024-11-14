@@ -17,8 +17,8 @@ const board = document.querySelector('.board');
 export const circuitComponents = {};
 
 export class CircuitComponent {
-  constructor(type, position) {
-      this.num = idNum++;
+  constructor(type, position, num) {
+      this.setNum(Number(num));
       this.type = type;
       this.value;
       this.options = {};
@@ -37,6 +37,16 @@ export class CircuitComponent {
       this.rotation = 0;
       this.diverse = 1;
       this.makeLineThick();
+  }
+  
+  setNum(num) {
+    if (num) {
+      this.num = num;
+      if (idNum < num) idNum = num+1;
+    }
+    else {
+      this.num = idNum++;
+    }
   }
   
   makeAPI(method) {

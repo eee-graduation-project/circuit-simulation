@@ -60,7 +60,6 @@ const addAnalysis = async () => {
 
 const postSimulate = async () => {
   try {
-    console.log(apis);
     await sendDataApi();
     apis = [];
     const analysis = await addAnalysis();

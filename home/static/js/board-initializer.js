@@ -22,10 +22,10 @@ const getInitialData = async () => {
   const wires = await getWires(boardId);
   
   components.forEach((comp) => {
-    const component = new CircuitComponent(comp.type, comp.position);
+    const component = new CircuitComponent(comp.type, comp.position, comp.num);
     component.setInitialCondition(comp.value, comp.options, comp.rotation, comp.diverse);
   })
-  console.log(circuitComponents);
+  
   wires.forEach((w) => {
     const wire = new CircuitWire(w.start, w.startDir);
     const startLine = document.querySelector(`[lineNum="${wire.start}${wire.startDir}"]`);

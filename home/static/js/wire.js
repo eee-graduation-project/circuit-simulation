@@ -9,7 +9,7 @@ let num = 0;
 export const circuitWires = {};
 
 export class CircuitWire {
-  constructor(start, startDir) {
+  constructor(start, startDir, n) {
       // this.position = position;
       this.start = start; // component data-id
       this.startDir = startDir; // component의 방향 T L R
@@ -17,8 +17,18 @@ export class CircuitWire {
       this.endDir;
       this.wires;
       this.drawWire();
-      this.num = num++;
+      this.setNum(Number(n));
       circuitWires[this.num]=this;
+  }
+  
+  setNum(n) {
+    if (n) {
+      this.num = n;
+      if (num <= n) num = n+1;
+    }
+    else {
+      this.num = num++;
+    }
   }
 
   makeAPI(method) {
@@ -85,8 +95,8 @@ export class CircuitWire {
 
     const startComponent = circuitComponents[this.start];
     const endComponent = circuitComponents[this.end];
-    startComponent.removeConnection(this.startDir, `${endComponent.num}${this.endDir}`);
-    endComponent.removeConnection(this.endDir, `${startComponent.num}${this.startDir}`);
+    startComponent?.removeConnection(this.startDir, `${this.end}${this.endDir}`);
+    endComponent?.removeConnection(this.endDir, `${this.start}${this.startDir}`);
     this.makeAPI('DELETE');
   }
 }
