@@ -172,6 +172,9 @@ def simulate_circuit(request):
       [analysis_type, result] = cmd_analysis(netlist, analysis, probeCurrent, probeVoltage, probeVout)
       response['analysis_type'] = analysis_type
       response['result'] = result
+      new_board = Board()
+      new_board.save()
+      response['newBoardId'] = new_board.id
     except Exception as e:
       error_message = str(e)
       error_details = traceback.format_exc()
