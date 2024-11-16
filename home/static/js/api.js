@@ -7,9 +7,12 @@ const runButton = document.querySelector('.button__simulate');
 
 export let apis = []; // {method, target, type}
 
-runButton.addEventListener('click', (event) => {
+runButton.addEventListener('click', async (event) => {
   event.preventDefault();
-  postSimulate();
+  const loader = document.querySelector('.loader');
+  loader.style.display = 'block';
+  await postSimulate();
+  loader.style.display = 'none';
 });
 
 const addProbe = async () => {
@@ -84,6 +87,10 @@ const postSimulate = async () => {
     }
   } catch (error) {
     console.error('Error in postSimulate:', error);
+    const errorContainer = document.querySelector('.error');
+    const errorMessage = errorContainer.querySelector('.error_message');
+    errorMessage.textContent = error;
+    errorContainer.style.display = 'flex';
   }
 }
 
@@ -158,9 +165,13 @@ const displayNode = (com2node) => {
 
 const getSimulate = async (boardId, analysis, probes) => {
   const url = `/api/simulation?` + new URLSearchParams({boardId, analysis, probes}).toString();
-  const data = await requestAPI('GET', url);
-  console.log(data);
-  return data;
+  try {
+    const data = await requestAPI('GET', url);
+    console.log(data);
+    return data;
+  } catch (error) {
+    throw error;
+  }
 }
 
 export const requestAPI = async (method, url, data) => {
@@ -186,4 +197,10 @@ closeButton.addEventListener("click", () => {
     svgElement.removeChild(svgElement.firstChild);
   }
   graph.style.display = "none";
+});
+
+const closeErrorButton = document.querySelector(".error__button_close");
+closeErrorButton.addEventListener("click", () => {
+  const errorContainer = document.querySelector('.error');
+  errorContainer.style.display = 'none';
 });

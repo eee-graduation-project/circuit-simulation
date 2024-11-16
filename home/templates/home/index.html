@@ -79,111 +79,116 @@
       {% comment %} </div> {% endcomment %}
       <button type="submit" class="button__modal_save">Save</button>
     </div>
+    <div class="loader"></div>
+    <div class="error">
+      <div class="error_message"></div>
+      <button class="error__button_close" type="button">닫기</button>
+    </div>
     <div class="rightside">
-    <div class="library">
-      <div class="library__search">
-        <div class="library__search__area">
-          <div class="search__text">Search</div>
-          <img src="{% static 'images/search.svg'%}" width="20px"></li>
+      <div class="library">
+        <div class="library__search">
+          <div class="library__search__area">
+            <div class="search__text">Search</div>
+            <img src="{% static 'images/search.svg'%}" width="20px"></li>
+          </div>
+        </div>
+        <div class="library__element">
+          <ul class="library__element_list">
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source.svg' %}" alt="voltage-source"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source.svg' %}" alt="current-source"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-signal-source.svg' %}" alt="voltage-signal-source"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/current-signal-source.svg' %}" alt="current-signal-source"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source-voltage-controlled.svg' %}" alt="voltage-source-voltage-controlled"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source-voltage-controlled.svg' %}" alt="current-source-voltage-controlled"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source-current-controlled.svg' %}" alt="voltage-source-current-controlled"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source-current-controlled.svg' %}" alt="current-source-current-controlled"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/capacitor.svg' %}" alt="capacitor"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/resistor.svg' %}" alt="resistor"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/ground.svg' %}" alt="ground"></li>
+            <li class="library__element_item"><img draggable="true" src="{% static 'images/inductor.svg' %}" alt="inductor"></li>
+          </ul>
         </div>
       </div>
-      <div class="library__element">
-        <ul class="library__element_list">
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source.svg' %}" alt="voltage-source"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source.svg' %}" alt="current-source"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-signal-source.svg' %}" alt="voltage-signal-source"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/current-signal-source.svg' %}" alt="current-signal-source"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source-voltage-controlled.svg' %}" alt="voltage-source-voltage-controlled"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source-voltage-controlled.svg' %}" alt="current-source-voltage-controlled"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/voltage-source-current-controlled.svg' %}" alt="voltage-source-current-controlled"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/current-source-current-controlled.svg' %}" alt="current-source-current-controlled"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/capacitor.svg' %}" alt="capacitor"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/resistor.svg' %}" alt="resistor"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/ground.svg' %}" alt="ground"></li>
-          <li class="library__element_item"><img draggable="true" src="{% static 'images/inductor.svg' %}" alt="inductor"></li>
-        </ul>
+      <div class="analysis" style="display: none;">
+        <h4>Analysis</h4>
+        <div class="analysis__mode">
+          <button type="button" class="button__mode_op">OP</button>
+          <button type="button" class="button__mode_dc">DC</button>
+          <button type="button" class="button__mode_ac">AC</button>
+          <button type="button" class="button__mode_tran">TRAN</button>
+        </div>
+        <form action='' method='POST'>
+          <fieldset data-mode="op" class="analysis__op_form">
+            <input type="hidden" name="mode" value="op" required>
+          </fieldset>
+          <fieldset data-mode="dc" class="analysis__dc_form" disabled style="display:none">
+            <input type="hidden" name="mode" value="dc" required>
+            <div class="analysis__form_content">
+              <label for="name">Name:</label>
+              <select id="name" name="name">
+              </select>
+            </div>
+            <div class="analysis__form_content">
+              <label for="start">Start Value:</label>
+              <input type="number" name="start" required>
+            </div>
+            <div class="analysis__form_content">
+              <label for="stop">Stop Value:</label>
+              <input type="number" name="stop" required>
+            </div>
+            <div class="analysis__form_content">
+              <label for="step">Step:</label>
+              <input type="number" name="step" required>
+            </div>
+          </fieldset>
+          <fieldset data-mode="ac" class="analysis__ac_form" disabled style="display:none">
+            <input type="hidden" name="mode" value="ac" required>
+            <div class="analysis__form_content">
+              <label for="type">Type:</label>
+              <select id="type" name="type">
+                <option value = "lin">lin</option>
+                <option value = "dec">dec</option>
+                <option value = "oct">oct</option>
+              </select>
+            </div>
+            <div class="analysis__form_content">
+              <label for="points">Points:</label>
+              <input type="number" name="points" required>
+            </div>
+            <div class="analysis__form_content">
+              <label for="start">Start Value:</label>
+              <input type="number" name="start" required>
+            </div>
+            <div class="analysis__form_content">
+              <label for="stop">Stop Value:</label>
+              <input type="number" name="stop" required>
+            </div>
+          </fieldset>
+          <fieldset data-mode="tran" class="analysis__tran_form" disabled style="display:none">
+            <input type="hidden" name="mode" value="tran">
+            <div class="analysis__form_content">
+              <label for="stop">Stop Time:</label>
+              <input type="number" name="stop" required>
+            </div>
+            <div class="analysis__form_content">
+              <label for="step">Step Time:</label>
+              <input type="number" name="step" required>
+            </div>
+          </fieldset>
+          <button type="submit" style="width: 100%" class="button__simulate">Run</button>
+        </form>
       </div>
-    </div>
-    <div class="analysis" style="display: none;">
-      <h4>Analysis</h4>
-      <div class="analysis__mode">
-        <button type="button" class="button__mode_op">OP</button>
-        <button type="button" class="button__mode_dc">DC</button>
-        <button type="button" class="button__mode_ac">AC</button>
-        <button type="button" class="button__mode_tran">TRAN</button>
+      <div class = "toggle">
+        <button type="button" class="button__library">Library</button>
+        <button type="button" class="button__analysis">Simulate</button>
       </div>
-      <form action='' method='POST'>
-        <fieldset data-mode="op" class="analysis__op_form">
-          <input type="hidden" name="mode" value="op" required>
-        </fieldset>
-        <fieldset data-mode="dc" class="analysis__dc_form" disabled style="display:none">
-          <input type="hidden" name="mode" value="dc" required>
-          <div class="analysis__form_content">
-            <label for="name">Name:</label>
-            <select id="name" name="name">
-            </select>
-          </div>
-          <div class="analysis__form_content">
-            <label for="start">Start Value:</label>
-            <input type="number" name="start" required>
-          </div>
-          <div class="analysis__form_content">
-            <label for="stop">Stop Value:</label>
-            <input type="number" name="stop" required>
-          </div>
-          <div class="analysis__form_content">
-            <label for="step">Step:</label>
-            <input type="number" name="step" required>
-          </div>
-        </fieldset>
-        <fieldset data-mode="ac" class="analysis__ac_form" disabled style="display:none">
-          <input type="hidden" name="mode" value="ac" required>
-          <div class="analysis__form_content">
-            <label for="type">Type:</label>
-            <select id="type" name="type">
-              <option value = "lin">lin</option>
-              <option value = "dec">dec</option>
-              <option value = "oct">oct</option>
-            </select>
-          </div>
-          <div class="analysis__form_content">
-            <label for="points">Points:</label>
-            <input type="number" name="points" required>
-          </div>
-          <div class="analysis__form_content">
-            <label for="start">Start Value:</label>
-            <input type="number" name="start" required>
-          </div>
-          <div class="analysis__form_content">
-            <label for="stop">Stop Value:</label>
-            <input type="number" name="stop" required>
-          </div>
-        </fieldset>
-        <fieldset data-mode="tran" class="analysis__tran_form" disabled style="display:none">
-          <input type="hidden" name="mode" value="tran">
-          <div class="analysis__form_content">
-            <label for="stop">Stop Time:</label>
-            <input type="number" name="stop" required>
-          </div>
-          <div class="analysis__form_content">
-            <label for="step">Step Time:</label>
-            <input type="number" name="step" required>
-          </div>
-        </fieldset>
-        <button type="submit" style="width: 100%" class="button__simulate">Run</button>
-      </form>
-    </div>
-    <div class = "toggle">
-      <button type="button" class="button__library">Library</button>
-      <button type="button" class="button__analysis">Simulate</button>
-    </div>
-    <div class="result">
-      <h4>Simulation Results</h4>
-      <h5>voltage of node</h5>
-      <ul class="result__voltage_list"></ul>
-      <h5>current of element</h5>
-      <ul class="result__current_list"></ul>
-    </div>
+      <div class="result">
+        <h4>Simulation Results</h4>
+        <h5>voltage of node</h5>
+        <ul class="result__voltage_list"></ul>
+        <h5>current of element</h5>
+        <ul class="result__current_list"></ul>
+      </div>
     </div>
   </div>
   <script>
