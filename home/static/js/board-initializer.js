@@ -1,7 +1,7 @@
 import {requestAPI} from "./api.js";
 import { CircuitComponent, circuitComponents } from "./component.js";
 import { getLinePosition } from "./drag-board.js";
-import { CircuitWire } from "./wire.js";
+import { CircuitWire, circuitWires } from "./wire.js";
 
 const getComponents = async (boardId) => {
   const url = `/api/component/?` + new URLSearchParams({boardId}).toString();
@@ -24,7 +24,7 @@ const getInitialData = async () => {
   components.forEach((comp) => {
     const component = new CircuitComponent(comp.type, comp.position, comp.num);
     component.setInitialCondition(comp.value, comp.options, comp.rotation, comp.diverse);
-  })
+  });
   
   wires.forEach((w) => {
     const wire = new CircuitWire(w.start, w.startDir);
@@ -38,7 +38,10 @@ const getInitialData = async () => {
 
     wire.updateWire(startPoint, endPoint);
     wire.setEndWire(w.end, w.endDir);
-  })
+  });
+
+  console.log(circuitComponents);
+  console.log(circuitWires);
 }
 
 getInitialData();
