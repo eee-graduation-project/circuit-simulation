@@ -165,16 +165,11 @@ def simulate_circuit(request):
     print(f"probeI : {probeCurrent}")
     print(f"probeVout : {probeVout}")
     
-    new_board = Board()
-    new_board.save()
-    response = {'com2node': com2node, 'netlist': netlist, 'analysis': analysis, 'probeVoltage': probeVoltage, 'probeCurrent': probeCurrent, 'probeVout': probeVout, 'newBoardId': new_board.id}
+    response = {'com2node': com2node, 'netlist': netlist, 'analysis': analysis, 'probeVoltage': probeVoltage, 'probeCurrent': probeCurrent, 'probeVout': probeVout}
     try:
       [analysis_type, result] = cmd_analysis(netlist, analysis, probeCurrent, probeVoltage, probeVout)
       response['analysis_type'] = analysis_type
       response['result'] = result
-      new_board = Board()
-      new_board.save()
-      response['newBoardId'] = new_board.id
     except Exception as e:
       error_message = str(e)
       error_details = traceback.format_exc()

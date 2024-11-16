@@ -65,7 +65,6 @@ const postSimulate = async () => {
     const analysis = await addAnalysis();
     const probes = await addProbe();
     const data = await getSimulate(window.boardId, analysis, JSON.stringify(probes));
-    window.boardId = data.newBoardId;
 
     displayNode(data.com2node);
 

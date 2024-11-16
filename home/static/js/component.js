@@ -42,7 +42,7 @@ export class CircuitComponent {
   setNum(num) {
     if (num) {
       this.num = num;
-      if (idNum < num) idNum = num+1;
+      if (idNum <= num) idNum = num+1;
     }
     else {
       this.num = idNum++;
@@ -51,7 +51,6 @@ export class CircuitComponent {
   
   makeAPI(method) {
     apis.push({method, 'target': this, 'type': 'component'});
-    console.log(apis);
   }
 
   async setInitialCondition(value, options, rotation, diverse) {
@@ -239,14 +238,14 @@ export class CircuitComponent {
   setOptionsText(option) {
     switch (option) {
       case 'ac': {
-        this.options ??= {'type': 'AC', 'magnitude': 1};
+        if (!this.options.type) this.options = {'type': 'AC', 'magnitude': 1};
         const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
         magnitude.setAttribute('text-anchor', 'start');
         magnitude.setAttribute('class', 'component__option_magnitude');
         return [magnitude];
       }
       case 'sine': {
-        this.options ??= {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
+        if (!this.options.type) this.options = {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
         const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
         offset.setAttribute('text-anchor', 'start');
         offset.setAttribute('class', 'component__option_offset');
@@ -259,7 +258,7 @@ export class CircuitComponent {
         return [offset, amplitude, frequency];
       }
       case 'pulse': {
-        this.options ??= {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
+        if (!this.options.type) this.options = {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
         const amplitude = this.createTextElement({'x': 70, 'y': 2}, `amplitude: ${this.options.amplitude}`);
         amplitude.setAttribute('text-anchor', 'start');
         amplitude.setAttribute('class', 'component__option_amplitude');
@@ -275,7 +274,7 @@ export class CircuitComponent {
         return [amplitude, period, tmax, option];
       }
       case 'unit': {
-        this.options ??= {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
+        if (!this.options.type) this.options = {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
         const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
         offset.setAttribute('text-anchor', 'start');
         offset.setAttribute('class', 'component__option_offset');
@@ -288,7 +287,7 @@ export class CircuitComponent {
         return [offset, amplitude, trise];
       }
       case 'pwl': {
-        this.options ??= {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
+        if (!this.options.type) this.options = {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
         const tv = this.createTextElement({'x': 70, 'y': 2}, `(t,v)`);
         tv.setAttribute('text-anchor', 'start');
         tv.setAttribute('class', 'component__option_tv');
