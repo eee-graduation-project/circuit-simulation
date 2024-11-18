@@ -381,14 +381,27 @@ export class CircuitComponent {
       const direction = line.getAttribute('lineNum').slice(-1);
       lineInfo[direction] = line.getBoundingClientRect();
     })
-    const pointL = getSVGCoordinates((this.rotation == 180) ? lineInfo.L?.right : lineInfo.L?.left, (this.rotation == 270) ? lineInfo.L?.bottom : lineInfo.L?.top);
-    const pointR = getSVGCoordinates((this.rotation == 180) ? lineInfo.R?.left : lineInfo.R?.right, (this.rotation == 90) ? lineInfo.R?.bottom : lineInfo.R?.top);
-    const pointT = getSVGCoordinates((this.rotation == 90) ? lineInfo.T?.right : lineInfo.T?.left, (this.rotation == 180) ? lineInfo.T?.bottom : lineInfo.T?.top);
-    const pointB = getSVGCoordinates((this.rotation == 270) ? lineInfo.B?.right : lineInfo.B?.left, (this.rotation == 180) ? lineInfo.B?.top : lineInfo.B?.bottom);
-    const pointI = getSVGCoordinates((this.rotation == 180) ? lineInfo.I?.right : lineInfo.I?.left, (this.rotation == 270) ? lineInfo.I?.bottom : lineInfo.I?.top);
-    const pointM = getSVGCoordinates((this.rotation == 180) ? lineInfo.M?.right : lineInfo.M?.left, (this.rotation == 270) ? lineInfo.M?.bottom : lineInfo.M?.top);
+    const point = {};
+    ['L', 'R', 'T', 'B', 'I', 'M'].forEach((direction) => {
+      point[`point${direction}`] = this.calculatePoint(direction, lineInfo[direction]);
+    });
+    return point;
+  }
 
-    return {pointL, pointR, pointT, pointB, pointI, pointM};
+  calculatePoint(direction, lineInfo) {
+    const start = {'L': 0, 'I':0, 'M':0, 'T':1, 'R':2, 'B':3};
+    const type = ['oL', 'oT', 'oR', 'oB'];
+    const relativeDirection = type[(start[direction]+(this.rotation/90)+(this.diverse==1 ? 0 : 2))%4];
+    switch (relativeDirection) {
+      case 'oL':
+        return getSVGCoordinates(lineInfo?.left, lineInfo?.top);
+      case 'oT':
+        return getSVGCoordinates(lineInfo?.left, lineInfo?.top);
+      case 'oR':
+        return getSVGCoordinates(lineInfo?.right, lineInfo?.top);
+      case 'oB':
+        return getSVGCoordinates(lineInfo?.left, lineInfo?.bottom);
+    }
   }
 
   moveConnectedWires(wireS, wireE) {

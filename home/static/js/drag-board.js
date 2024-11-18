@@ -93,7 +93,6 @@ export const startWire = (event) => {
 
 export const getLinePosition = (line, component) => {
   const {pointL, pointR, pointT, pointB, pointI, pointM} = component.getLinePoint();
-  let point;
   const direction = line.getAttribute('lineNum').slice(-1);
   switch (direction) {
     case 'L':
