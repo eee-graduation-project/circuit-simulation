@@ -10,10 +10,10 @@
 </head>
 <body>
   <div class="mainnav">
-    <div class="mainnav__title">
+    <a href="/home" class="mainnav__title">
       <img src="{% static 'images/logo.svg' %}" width="20px" class="mainnav__title__logo">
       <div class="mainnav__title__text">Circuit Simulator</div>
-    </div>
+    </a>
     {% comment %} <div class="mainnav__menu">
       <ul class="mainnav__menu__tab_list">
         <li class="mainnav__menu__tab_item">File<img src="{% static 'images/chevron-down.svg' %}" width="15px"></li>
@@ -118,7 +118,7 @@
           <button type="button" class="button__mode_tran">TRAN</button>
         </div>
         <form action='' method='POST'>
-          <fieldset data-mode="op" class="analysis__op_form">
+          <fieldset data-mode="op" class="analysis__op_form" style="border: none;">
             <input type="hidden" name="mode" value="op" required>
           </fieldset>
           <fieldset data-mode="dc" class="analysis__dc_form" disabled style="display:none">

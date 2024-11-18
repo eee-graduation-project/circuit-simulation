@@ -5,7 +5,7 @@ import {setProbe} from "./probe.js";
 import { boardDragStart, startWire } from "./drag-board.js";
 import { selectElement } from "./element-manipulations.js";
 import { addInputModal } from "./modal.js";
-import { apis } from "./api.js";
+import { apis, putApi } from "./api.js";
 
 const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'E', 'voltage-source-current-controlled': 'G', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'F', 'current-source-current-controlled': 'H', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
 const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'voltage-source-voltage-controlled': '', 'voltage-source-current-controlled': '', 'current-source': 'A', 'current-signal-source': '', 'current-source-voltage-controlled': '', 'current-source-current-controlled': '', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
@@ -50,7 +50,18 @@ export class CircuitComponent {
   }
   
   makeAPI(method) {
-    apis.push({method, 'target': this, 'type': 'component'});
+    const info = {method, target: this, type: 'component'};
+    if (method == 'PUT') {
+      const key = `c${this.num}`;
+      if (key in putApi) {apis[method][putApi[key]] = info;}
+      else {
+        putApi[key] = apis[method].length;
+        apis[method].push(info);
+      }
+    }
+    else {
+      apis[method].push(info);
+    }
   }
 
   async setInitialCondition(value, options, rotation, diverse) {
@@ -349,12 +360,14 @@ export class CircuitComponent {
   rotateComponent() {
     this.rotation = (this.rotation + 90)%360;
     const bbox = this.svgElement.getBBox();
-    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)/g, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
+    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)/, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
     this.svgElement.setAttribute('transform', transformInfo);
     
+    const textRotateInfo = `rotate(-${this.rotation} ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`;
     const texts = this.svgElement.querySelectorAll('text');
     texts.forEach((text) => {
-      text.setAttribute('transform', `rotate(-${this.rotation} ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`);
+      const textTransformInfo = (text.getAttribute('transform') || '').replace(/\s*rotate\([^\)]+\)\s*/, ' ');
+      text.setAttribute('transform', `${textTransformInfo} ${textRotateInfo}`);
     })
 
     const wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == this.num);
@@ -370,14 +383,27 @@ export class CircuitComponent {
       const direction = line.getAttribute('lineNum').slice(-1);
       lineInfo[direction] = line.getBoundingClientRect();
     })
-    const pointL = getSVGCoordinates((this.rotation == 180) ? lineInfo.L?.right : lineInfo.L?.left, (this.rotation == 270) ? lineInfo.L?.bottom : lineInfo.L?.top);
-    const pointR = getSVGCoordinates((this.rotation == 180) ? lineInfo.R?.left : lineInfo.R?.right, (this.rotation == 90) ? lineInfo.R?.bottom : lineInfo.R?.top);
-    const pointT = getSVGCoordinates((this.rotation == 90) ? lineInfo.T?.right : lineInfo.T?.left, (this.rotation == 180) ? lineInfo.T?.bottom : lineInfo.T?.top);
-    const pointB = getSVGCoordinates((this.rotation == 270) ? lineInfo.B?.right : lineInfo.B?.left, (this.rotation == 180) ? lineInfo.B?.top : lineInfo.B?.bottom);
-    const pointI = getSVGCoordinates((this.rotation == 180) ? lineInfo.I?.right : lineInfo.I?.left, (this.rotation == 270) ? lineInfo.I?.bottom : lineInfo.I?.top);
-    const pointM = getSVGCoordinates((this.rotation == 180) ? lineInfo.M?.right : lineInfo.M?.left, (this.rotation == 270) ? lineInfo.M?.bottom : lineInfo.M?.top);
+    const point = {};
+    ['L', 'R', 'T', 'B', 'I', 'M'].forEach((direction) => {
+      point[`point${direction}`] = this.calculatePoint(direction, lineInfo[direction]);
+    });
+    return point;
+  }
 
-    return {pointL, pointR, pointT, pointB, pointI, pointM};
+  calculatePoint(direction, lineInfo) {
+    const start = {'L': 0, 'I':0, 'M':0, 'T':1, 'R':2, 'B':3};
+    const type = ['oL', 'oT', 'oR', 'oB'];
+    const relativeDirection = type[(start[direction]+(this.rotation/90)+(this.diverse==1 ? 0 : 2))%4];
+    switch (relativeDirection) {
+      case 'oL':
+        return getSVGCoordinates(lineInfo?.left, lineInfo?.top);
+      case 'oT':
+        return getSVGCoordinates(lineInfo?.left, lineInfo?.top);
+      case 'oR':
+        return getSVGCoordinates(lineInfo?.right, lineInfo?.top);
+      case 'oB':
+        return getSVGCoordinates(lineInfo?.left, lineInfo?.bottom);
+    }
   }
 
   moveConnectedWires(wireS, wireE) {
@@ -439,9 +465,11 @@ export class CircuitComponent {
     const transformInfo = this.svgElement.getAttribute('transform').replace(/translate\([^\)]*\)\s*scale\([^\)]*\)\s*translate\([^\)]*\)/, `translate(${cx}, ${cy}) scale(${this.diverse}, 1) translate(${-cx}, ${-cy})`);
     this.svgElement.setAttribute('transform', transformInfo);
     
+    const diverseInfo = `translate(${cx}, ${cy}) scale(${(this.rotation/90)%2 ? 1 : this.diverse}, ${(this.rotation/90)%2 ? this.diverse : 1}) translate(${-cx}, ${-cy})`
     const texts = this.svgElement.querySelectorAll('text');
     texts.forEach((text) => {
-      text.setAttribute('transform', `translate(${cx}, ${cy}) scale(${this.diverse}, 1) translate(${-cx}, ${-cy})`);
+      const textTransformInfo = (text.getAttribute('transform') || '').replace(/\s*translate\([^\)]*\)\s*scale\([^\)]*\)\s*translate\([^\)]*\)\s*/, ' ');
+      text.setAttribute('transform', `${textTransformInfo} ${diverseInfo}`);
     })
 
     const wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == this.num);

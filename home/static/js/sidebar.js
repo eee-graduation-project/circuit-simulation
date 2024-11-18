@@ -11,7 +11,7 @@ libraryButton.addEventListener("click", () => {
 
 analysisButton.addEventListener("click", () => {
   const analysis = document.querySelector(".analysis");
-  analysis.style.display = "block";
+  analysis.style.display = "flex";
   const library = document.querySelector(".library");
   library.style.display = "none";
 });

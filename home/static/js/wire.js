@@ -1,4 +1,4 @@
-import { apis } from "./api.js";
+import { apis, putApi } from "./api.js";
 import { circuitComponents } from "./component.js";
 import { selectElement } from "./element-manipulations.js";
 import { setProbe } from "./probe.js";
@@ -32,7 +32,18 @@ export class CircuitWire {
   }
 
   makeAPI(method) {
-    apis.push({method, 'target': this, 'type': 'wire'});
+    const info = {method, target: this, type: 'wire'};
+    if (method == 'PUT') {
+      const key = `w${this.num}`;
+      if (key in putApi) {apis[method][putApi[key]] = info;}
+      else {
+        putApi[key] = apis[method].length;
+        apis[method].push(info);
+      }
+    }
+    else {
+      apis[method].push(info);
+    }
   }
 
   drawWire() {

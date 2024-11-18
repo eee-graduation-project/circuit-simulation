@@ -51,4 +51,10 @@ const drop = (event) => {
 
 
 const saveButton = document.querySelector(".button__modal_save");
-saveButton.addEventListener("click", saveInput);
+const inputForm = document.querySelector(".modal__content");
+
+saveButton.addEventListener("click", (event)=>{
+  event.preventDefault();
+  saveInput(event);
+});
+inputForm.addEventListener("submit", saveInput);
