@@ -360,12 +360,14 @@ export class CircuitComponent {
   rotateComponent() {
     this.rotation = (this.rotation + 90)%360;
     const bbox = this.svgElement.getBBox();
-    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)/g, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
+    const transformInfo = this.svgElement.getAttribute('transform').replace(/rotate\([^\)]+\)/, `rotate(${this.rotation}, ${bbox.x+bbox.width/2}, ${bbox.y+bbox.height/2})`);
     this.svgElement.setAttribute('transform', transformInfo);
     
+    const textRotateInfo = `rotate(-${this.rotation} ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`;
     const texts = this.svgElement.querySelectorAll('text');
     texts.forEach((text) => {
-      text.setAttribute('transform', `rotate(-${this.rotation} ${bbox.x+bbox.width/2} ${bbox.y+bbox.height/2})`);
+      const textTransformInfo = (text.getAttribute('transform') || '').replace(/\s*rotate\([^\)]+\)\s*/, ' ');
+      text.setAttribute('transform', `${textTransformInfo} ${textRotateInfo}`);
     })
 
     const wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == this.num);
@@ -463,9 +465,11 @@ export class CircuitComponent {
     const transformInfo = this.svgElement.getAttribute('transform').replace(/translate\([^\)]*\)\s*scale\([^\)]*\)\s*translate\([^\)]*\)/, `translate(${cx}, ${cy}) scale(${this.diverse}, 1) translate(${-cx}, ${-cy})`);
     this.svgElement.setAttribute('transform', transformInfo);
     
+    const diverseInfo = `translate(${cx}, ${cy}) scale(${(this.rotation/90)%2 ? 1 : this.diverse}, ${(this.rotation/90)%2 ? this.diverse : 1}) translate(${-cx}, ${-cy})`
     const texts = this.svgElement.querySelectorAll('text');
     texts.forEach((text) => {
-      text.setAttribute('transform', `translate(${cx}, ${cy}) scale(${this.diverse}, 1) translate(${-cx}, ${-cy})`);
+      const textTransformInfo = (text.getAttribute('transform') || '').replace(/\s*translate\([^\)]*\)\s*scale\([^\)]*\)\s*translate\([^\)]*\)\s*/, ' ');
+      text.setAttribute('transform', `${textTransformInfo} ${diverseInfo}`);
     })
 
     const wireS = Object.values(circuitWires).filter(circuitWire => circuitWire.start == this.num);
