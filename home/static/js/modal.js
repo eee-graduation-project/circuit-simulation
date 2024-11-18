@@ -84,7 +84,7 @@ export const addInputModal = (event) => {
 }
 
 export const saveInput = () => {
-  // event.preventDefault();
+  event.preventDefault();
   const component = circuitComponents[document.querySelector(".modify-input").getAttribute('data-id')];
   const inputForm = document.querySelector(".modal__content");
   
