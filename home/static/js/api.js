@@ -102,7 +102,7 @@ const postSimulate = async () => {
 const sendDataApi = async (method) => {
   const tasks = [];
   for (const api of apis[method]) {
-    switch (api.type) {
+    switch (api?.type) {
       case 'component':
         tasks.push(sendComponent(api.target, api.method));
         break;
