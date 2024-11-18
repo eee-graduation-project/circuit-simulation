@@ -1,8 +1,13 @@
 import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.16/+esm";
 
 export const generateOpResult = (result) => {
+  const opResult = document.querySelector('.result');
+  opResult.style.display = 'block';
+
   const voltageList = document.querySelector('.result__voltage_list');
   const currentList = document.querySelector('.result__current_list');
+  voltageList.innerHTML = '';
+  currentList.innerHTML = '';
 
   Object.entries(result.voltage).forEach(([key, value]) => {
     const listItem = document.createElement('li');
