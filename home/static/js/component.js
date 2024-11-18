@@ -178,7 +178,7 @@ export class CircuitComponent {
 
     const transparentWire = wire.cloneNode(true);
     transparentWire.setAttribute('stroke', 'transparent');
-    transparentWire.setAttribute('stroke-width', '15');
+    transparentWire.setAttribute('stroke-width', '4');
     this.svgElement.appendChild(transparentWire);
     this.transparentWires.push(transparentWire);
     this.transparentWires.push(wire);

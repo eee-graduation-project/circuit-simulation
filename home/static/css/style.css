@@ -122,7 +122,6 @@ body {
   background-color: #EDEDED;
   width: fit-content;
   flex-direction: column;
-  height: 60%;
   padding: 10px;
   gap: 10px;
 }
