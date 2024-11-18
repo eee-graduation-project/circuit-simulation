@@ -5,7 +5,7 @@ import {setProbe} from "./probe.js";
 import { boardDragStart, startWire } from "./drag-board.js";
 import { selectElement } from "./element-manipulations.js";
 import { addInputModal } from "./modal.js";
-import { apis } from "./api.js";
+import { apis, putApi } from "./api.js";
 
 const firstName = {'voltage-source': 'V', 'voltage-signal-source': 'V', 'voltage-source-voltage-controlled': 'E', 'voltage-source-current-controlled': 'G', 'current-source': 'I', 'current-signal-source': 'I', 'current-source-voltage-controlled': 'F', 'current-source-current-controlled': 'H', 'resistor': 'R', 'inductor': 'L', 'capacitor': 'C', 'ground': 'G'};
 const defaultValue = {'voltage-source': 'V', 'voltage-signal-source': '', 'voltage-source-voltage-controlled': '', 'voltage-source-current-controlled': '', 'current-source': 'A', 'current-signal-source': '', 'current-source-voltage-controlled': '', 'current-source-current-controlled': '', 'resistor': 'Ω', 'inductor': 'H', 'capacitor': 'F'};
@@ -50,7 +50,18 @@ export class CircuitComponent {
   }
   
   makeAPI(method) {
-    apis.push({method, 'target': this, 'type': 'component'});
+    const info = {method, target: this, type: 'component'};
+    if (method == 'PUT') {
+      const key = `c${this.num}`;
+      if (key in putApi) {apis[method][putApi[key]] = info;}
+      else {
+        putApi[key] = apis[method].length;
+        apis[method].push(info);
+      }
+    }
+    else {
+      apis[method].push(info);
+    }
   }
 
   async setInitialCondition(value, options, rotation, diverse) {

@@ -5,7 +5,8 @@ import { generateAcResult, generateDcResult, generateOpResult, generateTranResul
 
 const runButton = document.querySelector('.button__simulate');
 
-export let apis = []; // {method, target, type}
+export const apis = {'POST':[], 'PUT':[], 'DELETE':[]}; // {method, target, type}
+export const putApi = {}; // target : array index
 
 runButton.addEventListener('click', async (event) => {
   event.preventDefault();
@@ -63,12 +64,16 @@ const addAnalysis = async () => {
 
 const postSimulate = async () => {
   try {
-    await sendDataApi();
-    apis = [];
+    await sendDataApi('POST');
+    await sendDataApi('PUT');
+    await sendDataApi('DELETE');
     const analysis = await addAnalysis();
     const probes = await addProbe();
     const data = await getSimulate(window.boardId, analysis, JSON.stringify(probes));
 
+    const opResult = document.querySelector('.result');
+    opResult.style.display = 'none';
+    
     displayNode(data.com2node);
 
     switch (data['analysis_type']) {
@@ -94,17 +99,20 @@ const postSimulate = async () => {
   }
 }
 
-const sendDataApi = async () => {
-  for (const api of apis) {
+const sendDataApi = async (method) => {
+  const tasks = [];
+  for (const api of apis[method]) {
     switch (api.type) {
       case 'component':
-        await sendComponent(api.target, api.method);
+        tasks.push(sendComponent(api.target, api.method));
         break;
       case 'wire':
-        await sendWire(api.target, api.method);
+        tasks.push(sendWire(api.target, api.method));
         break;
     }
-  }
+  };
+  await Promise.all(tasks);
+  apis[method] = [];
 }
 
 const sendComponent = async (component, method) => {
