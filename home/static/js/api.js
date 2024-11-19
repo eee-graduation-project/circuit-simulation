@@ -178,6 +178,7 @@ const getSimulate = async (boardId, analysis, probes) => {
     console.log(data);
     return data;
   } catch (error) {
+    console.error('error in get Simulate: ', error);
     throw error;
   }
 }
@@ -192,8 +193,16 @@ export const requestAPI = async (method, url, data) => {
   }
   if (data) request['body'] = JSON.stringify(data);
 
-  const response = await fetch(url, request);
-  return response.json();
+  try {
+    const response = await fetch(url, request);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.simulation_error.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
 }
 
 const closeButton = document.querySelector(".graph__button_close");
