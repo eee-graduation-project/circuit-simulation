@@ -175,7 +175,6 @@ const getSimulate = async (boardId, analysis, probes) => {
   const url = `/api/simulation?` + new URLSearchParams({boardId, analysis, probes}).toString();
   try {
     const data = await requestAPI('GET', url);
-    console.log(data);
     return data;
   } catch (error) {
     console.error('error in get Simulate: ', error);

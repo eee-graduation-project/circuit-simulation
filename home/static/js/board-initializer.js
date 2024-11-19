@@ -39,9 +39,6 @@ const getInitialData = async () => {
     wire.updateWire(startPoint, endPoint);
     wire.setEndWire(w.end, w.endDir);
   });
-
-  console.log(circuitComponents);
-  console.log(circuitWires);
 }
 
 getInitialData();
