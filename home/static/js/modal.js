@@ -5,6 +5,10 @@ const modal = document.querySelector(".modal");
 const modalContent = document.querySelector(".modal__content");
 const toggle = document.querySelector(".modal__content_toggle");
 
+const addButton = document.querySelector(".pwl__button_add");
+const deleteButton = document.querySelector(".pwl__button_remove");
+let pwlSelected;
+
 const createInputHtml = (label) => {
   const fieldDiv = document.createElement('div');
   fieldDiv.classList.add('modal__field');
@@ -93,7 +97,6 @@ export const saveInput = () => {
   })
   
   component.svgElement.classList.remove("modify-input");
-  document.querySelector(".pwl__button_add")?.remove();
   // closeModal();
 
   modal.style.display = "none";
@@ -109,18 +112,20 @@ types.forEach((type) => {
 
 const modalButtonEvent = (type) => {
   modal.style.display = "block";
+  addButton.style.display = 'none';
+  deleteButton.style.display = 'none';
+
   const component = circuitComponents[document.querySelector(".modify-input").getAttribute('data-id')];
   modalContent.innerHTML = '';
   component.setOptions(type);
+
   switch (type) {
     case 'ac': {
-      document.querySelector(".pwl__button_add")?.remove();
       const magnitudeInput = createInputHtml('magnitude');
       magnitudeInput.value = component.options.magnitude;
       break;
     }
     case 'sine': {
-      document.querySelector(".pwl__button_add")?.remove();
       const offsetInput = createInputHtml('offset');
       offsetInput.value = component.options.offset;
       const amplitudeInput = createInputHtml('amplitude');
@@ -130,7 +135,6 @@ const modalButtonEvent = (type) => {
       break;
     }
     case 'pulse': {
-      document.querySelector(".pwl__button_add")?.remove();
       const amplitudeInput = createInputHtml('amplitude');
       amplitudeInput.value = component.options.amplitude;
       const periodInput = createInputHtml('period');
@@ -142,7 +146,6 @@ const modalButtonEvent = (type) => {
       break;
     }
     case 'unit': {
-      document.querySelector(".pwl__button_add")?.remove();
       const offsetInput = createInputHtml('offset');
       offsetInput.value = component.options.offset;
       const amplitudeInput = createInputHtml('amplitude');
@@ -156,20 +159,9 @@ const modalButtonEvent = (type) => {
         const input = createInputHtml(key);
         input.value = value;
       });
-      if (!document.querySelector('.pwl__button_add')) {
-        const addButton = document.createElement('button');
-        addButton.classList.add("pwl__button_add");
-        addButton.textContent = "add (t, v)";
-        addButton.type = "button";
-
-        const deleteButton = addButton.cloneNode(true);
-        deleteButton.textContent = "remove (t, v)";
-        
-        addButton.addEventListener("click", (event) => {addTnV(event, component)});
-        modal.insertBefore(addButton, modal.lastElementChild);
-        deleteButton.addEventListener("click", (event) => {removeTnV(event, component)});
-        modal.insertBefore(deleteButton, modal.lastElementChild);
-      }
+      addButton.style.display = 'block';
+      deleteButton.style.display = 'block';
+      pwlSelected = component;
       break;
     }
   }
@@ -178,22 +170,22 @@ const modalButtonEvent = (type) => {
   component.svgElement.classList.add("modify-input");
 }
 
-const addTnV = (event, component) => {
+const addTnV = (event) => {
   event.preventDefault();
   const modalField = document.querySelectorAll(".modal__field");
   const cnt = modalField.length/2;
   const tInput = createInputHtml(`t${cnt+1}`);
   const vInput = createInputHtml(`v${cnt+1}`);
-  component.addTnVOption(cnt+1);
-  tInput.value = component.options.tv[`t${cnt+1}`];
-  vInput.value = component.options.tv[`v${cnt+1}`];
+  pwlSelected.addTnVOption(cnt+1);
+  tInput.value = pwlSelected.options.tv[`t${cnt+1}`];
+  vInput.value = pwlSelected.options.tv[`v${cnt+1}`];
 }
 
-const removeTnV = (event, component) => {
+const removeTnV = (event) => {
   event.preventDefault();
   const modalField = document.querySelectorAll(".modal__field");
   const cnt = modalField.length/2;
-  component.removeTnVOption(cnt);
+  pwlSelected.removeTnVOption(cnt);
   modalField.forEach((field) => {
     const input = field.querySelector("input");
     if ([`t${cnt}`, `v${cnt}`].includes(input.name)) {
@@ -201,3 +193,6 @@ const removeTnV = (event, component) => {
     }
   })
 }
+
+addButton.addEventListener("click", addTnV);
+deleteButton.addEventListener("click", removeTnV);

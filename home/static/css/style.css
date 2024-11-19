@@ -403,7 +403,8 @@ body {
   -ms-user-select:none;
 }
 
-.pwl__button_add {
+.pwl__button_add, .pwl__button_remove {
+  display: none;
   margin-top: 20px;
   padding: 10px;
   width: 100%;
@@ -415,7 +416,7 @@ body {
   cursor: pointer;
 }
 
-.pwl__button_add:hover {
+.pwl__button_add:hover, .pwl__button_remove:hover {
   background-color: #EDEDED;
 }
 
