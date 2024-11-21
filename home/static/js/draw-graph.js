@@ -147,11 +147,12 @@ const drawGraph = (key, data, xLabel, yLabel) => {
       Plot.ruleY([0]),
       Plot.ruleX([0]),
       Plot.line(data, { x: "x", y: "y", curve: "catmull-rom", tension: 0.5, stroke: "blue", strokeWidth: 2, channels: {x: "x", y: "y"}, tooltip: d => `(${d.x}, ${d.y})` }),
-      Plot.dot(data, { x: "x", y: "y", fill: "blue", r: 3, channels: {x: "x", y: "y"}, tip: true }),
+      // Plot.tip(data, Plot.pointerX({x: "x", y: "y", format: {x: (d) => d, y: (d) => d}})),
+      Plot.dot(data, { x: "x", y: "y", fill: "blue", r: 3, channels: {x: "x", y: "y"}, tip: {format: {x: (d) => d, y: (d) => d}} }),
       Plot.crosshair(data, {x: "x", y: "y"}),
     ],
-    x: { label: xLabel },
-    y: { label: yLabel }
+    x: { label: xLabel, grid: true },
+    y: { label: yLabel, grid: true }
   })
   plot.setAttribute("height", "95%");
   plot.setAttribute("width", "95%");
