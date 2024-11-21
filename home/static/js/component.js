@@ -67,7 +67,7 @@ export class CircuitComponent {
   async setInitialCondition(value, options, rotation, diverse) {
     if (value) this.setValue('value', value);
     this.options = options;
-    if (options.length) this.setOptions(options.type.toLowerCase());
+    if (options.type) this.setOptions(options.type.toLowerCase(), true);
     
     await new Promise(resolve => setTimeout(resolve, 200));
     this.rotation = (rotation - 90)%360;
@@ -235,28 +235,28 @@ export class CircuitComponent {
     }
   }
   
-  setOptions(option) {
-    if (option == this.options.type.toLowerCase()) return;
+  setOptions(option, initial=false) {
+    if (!initial && option == this.options.type.toLowerCase()) return;
     const elements = document.querySelectorAll('[class^="component__option_"]');
     elements.forEach((element) => {
       element.remove();
     })
 
-    const texts = this.setOptionsText(option);
+    const texts = this.setOptionsText(option, initial);
     this.svgElement.append(...texts);
   }
 
-  setOptionsText(option) {
+  setOptionsText(option, initial=false) {
     switch (option) {
       case 'ac': {
-        this.options = {'type': 'AC', 'magnitude': 1};
+        if (!initial) this.options = {'type': 'AC', 'magnitude': 1};
         const magnitude = this.createTextElement({'x': 70, 'y': 2}, `magnitude: ${this.options.magnitude}`);
         magnitude.setAttribute('text-anchor', 'start');
         magnitude.setAttribute('class', 'component__option_magnitude');
         return [magnitude];
       }
       case 'sine': {
-        this.options = {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
+        if (!initial) this.options = {'type': 'SINE', 'offset': 0, 'amplitude': 1, 'frequency': '1k'};
         const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
         offset.setAttribute('text-anchor', 'start');
         offset.setAttribute('class', 'component__option_offset');
@@ -269,7 +269,7 @@ export class CircuitComponent {
         return [offset, amplitude, frequency];
       }
       case 'pulse': {
-        this.options = {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
+        if (!initial) this.options = {'type': 'PULSE', 'amplitude': 1, 'period': 1, 'tmax': '5', 'option': 1};
         const amplitude = this.createTextElement({'x': 70, 'y': 2}, `amplitude: ${this.options.amplitude}`);
         amplitude.setAttribute('text-anchor', 'start');
         amplitude.setAttribute('class', 'component__option_amplitude');
@@ -285,7 +285,7 @@ export class CircuitComponent {
         return [amplitude, period, tmax, option];
       }
       case 'unit': {
-        this.options = {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
+        if (!initial) this.options = {'type': 'UNIT', 'offset': 0, 'amplitude': 1, 'trise': '0.1m'};
         const offset = this.createTextElement({'x': 70, 'y': 2}, `offset: ${this.options.offset}`);
         offset.setAttribute('text-anchor', 'start');
         offset.setAttribute('class', 'component__option_offset');
@@ -298,7 +298,7 @@ export class CircuitComponent {
         return [offset, amplitude, trise];
       }
       case 'pwl': {
-        this.options = {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
+        if (!initial) this.options = {'type': 'PWL', 'tv':{'t1': 0, 'v1': 1}, 'trise': '0.1m'};
         const tv = this.createTextElement({'x': 70, 'y': 2}, `(t,v)`);
         tv.setAttribute('text-anchor', 'start');
         tv.setAttribute('class', 'component__option_tv');
