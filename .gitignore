@@ -8,3 +8,5 @@ migrations
 db.sqlite3
 
 legacy
+
+node_modules
