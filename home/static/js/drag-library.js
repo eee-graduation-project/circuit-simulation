@@ -1,60 +1,60 @@
-import {getSVGCoordinates} from "./utils.js";
-import {boardDragStart, startWire} from "./drag-board.js";
-import { selectElement } from "./element-manipulations.js";
-import {CircuitComponent} from "./component.js"
-import {setProbe} from "./probe.js";
-import { addInputModal, saveInput } from "./modal.js";
+import { getSVGCoordinates } from './utils.js';
+import { CircuitComponent } from './component.js';
+import { saveInput } from './modal.js';
 
-const board = document.querySelector(".board");
-const elements = document.querySelectorAll(".library__element_item img");
+const board = document.querySelector('.board');
+const elements = document.querySelectorAll('.library__element_item img');
 
 let elementEvent;
-let offsetX, offsetY;
+let offsetX;
+let offsetY;
 
 elements.forEach((element) => {
-  element.addEventListener("dragstart", (event) => {
-    dragStart(event)
-  });
-})
-board.addEventListener("dragover", (event) => {
-  dragOver(event)
+    element.addEventListener('dragstart', (event) => {
+        dragStart(event);
+    });
 });
-board.addEventListener("drop", (event) => {
-  drop(event)
+board.addEventListener('dragover', (event) => {
+    dragOver(event);
+});
+board.addEventListener('drop', (event) => {
+    drop(event);
 });
 
 const dragStart = (event) => {
-  elementEvent = event;
-}
+    elementEvent = event;
+};
 
 const dragOver = (event) => {
-  event.preventDefault();
-}
+    event.preventDefault();
+};
 
 const drop = (event) => {
-  event.preventDefault();
-  if (!elementEvent) return;
+    event.preventDefault();
+    if (!elementEvent) return;
 
-  const rect = elementEvent.target.getBoundingClientRect();
-  offsetX = elementEvent.clientX - rect.left;
-  offsetY = elementEvent.clientY - rect.top;
+    const rect = elementEvent.target.getBoundingClientRect();
+    offsetX = elementEvent.clientX - rect.left;
+    offsetY = elementEvent.clientY - rect.top;
 
-  const position = getSVGCoordinates(event.pageX - offsetX, event.pageY - offsetY);
-  // const position = {'x': event.clientX - offsetX, 'y': event.clientY - offsetY};
-  const elementType = elementEvent.target.alt;
-  
-  const component = new CircuitComponent(elementType, position);
-  component.makeAPI('POST');
-  
-  elementEvent = null;
-}
+    const position = getSVGCoordinates(
+        event.pageX - offsetX,
+        event.pageY - offsetY,
+    );
+    // const position = {'x': event.clientX - offsetX, 'y': event.clientY - offsetY};
+    const elementType = elementEvent.target.alt;
 
+    const component = new CircuitComponent(elementType, position);
+    component.makeAPI('POST');
 
-const saveButton = document.querySelector(".button__modal_save");
-const inputForm = document.querySelector(".modal__content");
+    elementEvent = null;
+};
 
-saveButton.addEventListener("click", (event)=>{
-  event.preventDefault();
-  saveInput(event);
+const saveButton = document.querySelector('.button__modal_save');
+const inputForm = document.querySelector('.modal__content');
+
+saveButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    saveInput(event);
 });
-inputForm.addEventListener("submit", saveInput);
+inputForm.addEventListener('submit', saveInput);

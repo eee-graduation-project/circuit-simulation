@@ -1,25 +1,30 @@
 {
-  "name": "circuit-simulation",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:js": "eslint . --ext .js,.jsx,.mjs",
-    "lint:py": "flake8 .",
-    "format:js": "prettier --check .",
-    "lint": "npm run lint:js && npm run lint:py && npm run format:js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@eslint/js": "^9.18.0",
-    "eslint": "^9.18.0",
-    "eslint-config-prettier": "^10.0.1",
-    "eslint-plugin-prettier": "^5.2.3",
-    "eslint-plugin-react": "^7.37.4",
-    "globals": "^15.14.0",
-    "prettier": "^3.4.2"
-  }
+    "name": "circuit-simulation",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint:js": "eslint .",
+        "lint:py": "flake8 .",
+        "format:js": "prettier --write .",
+        "format:py": "black .",
+        "lint": "npm run lint:js && npm run lint:py && npm run format:js && npm run format:py"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@eslint/js": "^9.18.0",
+        "eslint": "^8.57.1",
+        "eslint-config-airbnb": "^19.0.4",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-plugin-jsx-a11y": "^6.10.2",
+        "eslint-plugin-prettier": "^5.2.3",
+        "eslint-plugin-react": "^7.37.4",
+        "eslint-plugin-react-hooks": "^4.6.2",
+        "globals": "^15.14.0",
+        "prettier": "^3.4.2"
+    }
 }

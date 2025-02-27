@@ -10,3 +10,6 @@ db.sqlite3
 legacy
 
 node_modules
+
+home/simulation
+home/static/js/Component.jsx

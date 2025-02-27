@@ -2,12 +2,16 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "eslint.format.enable": true,
+    "prettier.printWidth": 80,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+        "source.fixAll.eslint": true
     },
-    "python.linting.flake8Args": [
-      "--max-line-length=88",
-      "--ignore=E203,W503"
-    ]
-  }
-  
+    "python.linting.flake8Args": ["--max-line-length=88", "--ignore=E203,W503"],
+    "python.formatting.provider": "black",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "[javascript]": {
+        "editor.dafualtFormatter": "esbenp.prettier-vscode"
+    }
+}
